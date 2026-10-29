@@ -164,8 +164,8 @@ binds {
     Mod+W                       { toggle-column-tabbed-display; }
 
     // ─── 截图 ───
+    Mod+Shift+S                 { spawn-sh "noctalia msg screenshot-region"; }  // 区域截图（Win+Shift+S 风格）
     Print                       { screenshot-screen; }
-    Mod+Print                   { spawn "mark-shot"; }
     Ctrl+Shift+1                { screenshot; }
     Ctrl+Shift+2                { screenshot-screen; }
     Ctrl+Shift+3                { screenshot-window; }
@@ -181,7 +181,6 @@ binds {
     // Mod+Shift+C              { spawn-sh "noctalia msg caffeine-toggle"; }        // 防熄屏
     // Mod+Shift+N              { spawn-sh "noctalia msg notification-dnd-toggle"; } // 免打扰
     // 截图增强
-    // Mod+Shift+S              { spawn-sh "noctalia msg screenshot-region"; }      // 区域截图
     // Mod+Shift+A              { spawn-sh "noctalia msg screenshot-annotate"; }    // 圈点标注
     // 更快的键盘工作区切换（与 Page 键二选一）
     // Mod+U                    { focus-workspace-down; }

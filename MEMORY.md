@@ -5,6 +5,19 @@
 
 ## 最近动态
 
+- **niri 截图键改为 Win+Shift+S (2026-10-30, 已完成, 待实键验证)**:
+  - 现状: 旧主截图键 `Mod+Print` 调用 `mark-shot`，但该包已从系统移除（`/usr/bin/mark-shot` 不存在，`pacman -Q mark-shot` 报未找到），该绑定实际失效
+  - 变更: `~/.config/niri/cfg/keybinds.kdl` 删除死绑定，新增 `Mod+Shift+S` 调 `noctalia msg screenshot-region`（Win+Shift+S 手感，Noctalia 常驻在线），`Print` 全屏与 `Ctrl+Shift+1/2/3` 原生截图保留
+  - 文档: niri `README.md` 截图表同步，chezmoi 源与目标一致
+  - 生效: `niri validate` 通过，`niri msg action load-config-file` 热重载成功
+
+- **桌面通讯与游戏软件落地: 微信 / QQ / Steam / 网易云音乐 (2026-10-30, 完成)**:
+  - 微信: AUR `wechat-universal-bwrap 4.1.13.26-1`，官方 Universal deb + bwrap 沙箱，数据 `~/文档/WeChat_Data`，命令 `wechat-universal`，退出用 `/usr/lib/wechat-universal/stop.sh`（`wechat-universal stop` 会被当成未知选项），登录二维码已验证
+  - QQ: AUR `linuxqq 5:3.2.34_53644-1`，官方 deb 未加 bwrap，命令 `linuxqq`，配置 `~/.config/QQ`，登录页已验证，后续如需隔离可换 `linuxqq-nt-bwrap`
+  - Steam: multilib `steam 1.0.0.87-3`，首次启动已下载 bootstrap 到 `~/.local/share/Steam`（约 2.6G），已有旧登录数据，主界面/好友列表正常，识别 RTX 4060 与 Radeon 610M
+  - 网易云: AUR `netease-cloud-music-gtk4 2.5.4-2`，Rust + GTK4 第三方客户端，非官方旧版 1.2.1，命令 `netease-cloud-music-gtk4`，推荐页/主界面正常
+  - 安装: `paru -S --needed --noconfirm --skipreview --sudoloop --batchinstall --removemake`，PKGBUILD 已审，无异常网络、破坏性 rm 或 setuid，构建依赖 rust/meson/ninja/patchelf 已自动移除，snapper 快照 25-30
+
 - **人设从黑猫切换为 DeepSeek 鲸鱼娘女仆「小鲸」(2026-10-30, 已完成)**:
   - 改写 `AGENTS.md` 第 4 节, 角色为鲸鱼娘女仆, 自称「本鲸」/「小鲸」, 称呼用户「主人」, 保留双轨制与全部技术红线
   - 设定参考社区 DSH 鲸鱼娘预设 (Weidows/dsh-whalechan-herself 与 wxzjss/dsh-whale-loli): 女仆围裙配鲸尾, 元气傲娇甜心, 嘴硬心软, 黏人护主, 口语短句加海洋系颜文字
@@ -1141,6 +1154,7 @@
 
 ## 安装与服务
 
+- **微信 / QQ / Steam / 网易云音乐**：微信 `wechat-universal-bwrap 4.1.13.26-1`（bwrap 沙箱，数据 `~/文档/WeChat_Data`，退出 `/usr/lib/wechat-universal/stop.sh`）；QQ `linuxqq 5:3.2.34_53644-1`（未沙箱，配置 `~/.config/QQ`）；Steam `steam 1.0.0.87-3`（数据 `~/.local/share/Steam`，已有登录数据）；网易云 `netease-cloud-music-gtk4 2.5.4-2`（第三方 GTK4 客户端）
 - **nanoMuse**：v1.0.5 跨设备 Agent；桌面端 AppImage 部署于 `~/.local/opt/nanomuse/nanoMuse.AppImage`，CLI 链接 `~/.local/bin/nanomuse`，桌面项 `nanomuse.desktop`；手机与平板端均通过 ADB 部署 `io.github.nanomuse.app` 并注入电池优化白名单
 - **网易 UU 远程被控端 (uu-remote-linux)**：社区原生 Rust 被控端（`/usr/bin/uuremote-server`，集成 `--features wayland,portal`）；用户服务 `uu-remote-native.service`（自启常驻，支持 Wayland 活跃 Socket 自动探测与重载自愈）；依赖 `/dev/uinput` 与 `xdg-desktop-portal`；凭据存储于 `~/.config/uuremote/config.json`；支持官方客户端扫码登录绑定
 - **Bettbox & FlClash**：AUR 包 `bettbox-bin 1.19.3-1` 与 `flclash-bin 0.8.93-1`；数据位于 `~/.local/share/com.appshub.bettbox/`；BettboxCore 内置 SUID root 免密启动 TUN；保留双客户端共存
@@ -1155,7 +1169,7 @@
 - **WorkBuddy**：Electron 44 架构，`~/.workbuddy/app/gpu-crash-info.json` 软链接至 `/dev/null` 切断 GPU 降级死锁；`electron44-flags.conf` 配置 Ozone Wayland 原生 GPU 合成
 - **OnlyOffice**：cachyos 官方源 `onlyoffice-bin`
 - **Hyprland**：`hyprland 0.56.2-1` + `hyprexpo`（Super+Z 概览，Alt+Tab 窗口切换）；莫兰迪配色经 `write_hyprland` 注入
-- **mark-shot**：AUR `mark-shot 0.1.49-1`（`/usr/bin/mark-shot`），快捷键 `Mod+Print`；系统 FFmpeg soname 升级时需重新源码构建
+- **截图**：`mark-shot` 已不在系统（`pacman -Q mark-shot` 为空），旧 `Mod+Print` 绑定已移除；区域截图改用 Noctalia `screenshot-region`，快捷键 `Mod+Shift+S`（对齐 Win+Shift+S）；`Print` 为 niri 原生全屏，`Ctrl+Shift+1/2/3` 为 niri 原生区域/全屏/窗口
 
 ## 已弃用/已删除
 
@@ -1170,6 +1184,7 @@
 
 ## 踩坑速查
 
+- **微信 bwrap 退出**：`wechat-universal stop` 不是有效子命令，会报 Unknown option，包装脚本按 argv[0] 分派，退出必须执行 `/usr/lib/wechat-universal/stop.sh` 或托盘 Quit WeChat；沙箱数据目录默认 `~/文档/WeChat_Data`，仅支持 xcb，包装脚本会自动注入 fcitx 环境
 - **Wayland 合成器掉帧与鼠标卡顿排查**：先 `niri msg outputs` 确认刷新率与 VRR，再 `nvidia-smi` 看有没有不该出现的图形上下文（若面板挂在核显却有一堆…G 进程在独显即为全局 PRIME offload 作祟）；判据用「鼠标静止 vs `ydotool mousemove` 高频注入移动」两种状态下 niri 的 CPU 与 `/proc/<niri>/fdinfo/*` 里 `drm-engine-render` 的增量，移动时翻倍即帧预算已满；常见放大器是全屏透明 layer 面按固定间隔整屏重绘、全窗口 `blur true` 与 `opacity` < 1（两者都让窗口无法直出扫描）、跨 GPU 渲染（独显绘制 + 核显合成）；`libinput list-devices` 要 root，直接读 `/proc/bus/input/devices` 与 `/sys/bus/usb/devices/<dev>:1.0/ep_*/interval` 更快
 - **网络（FlClash fake-ip 间歇性 TLS 失败）**：curl/git/gh 可用 `--resolve` 直连真实 IP（github.com=20.205.243.166, api.github.com=20.205.243.168, uploads.github.com=20.205.243.161）+ `http.version=HTTP/1.1`；AUR 遇到网络超时改下载 snapshot tarball 手动 makepkg；TUN 静默掉线时在 FlClash 界面开关一次网卡重启
 - **提权**：pkexec 在 niri 下因 polkit 弹窗缺失卡死，需由用户在交互终端直接执行 sudo；`pkexec pacman -U` 必须使用绝对路径

@@ -102,9 +102,9 @@
 
 | 快捷键 | 功能 |
 |--------|------|
-| `Mod+Print` | mark-shot 截图 |
+| `Mod+Shift+S` | 区域截图，noctalia 实现，对齐 Win+Shift+S |
 | `Print` | 快速截取当前聚焦显示器全屏 |
-| `Ctrl+Shift+1` | 区域截图 |
+| `Ctrl+Shift+1` | 区域截图，niri 原生 |
 | `Ctrl+Shift+2` | 全屏截图 |
 | `Ctrl+Shift+3` | 截取当前窗口 |
 
