@@ -12,7 +12,8 @@
   - Windows 分区本次只读临时挂载在 `/run/media/sigrika/OS`, 读完即卸载, 未写入任何内容
   - 落地脚本 `~/.local/bin/asus-fan-curve` (chezmoi 托管), 子命令 show / restore / balanced|performance|silent, 支持 `--keep-temps` 与 `--dry-run`, 占空比按 % × 255 ÷ 100 换算
   - 断点差异: 固件现存断点 63/70/73/73/78/78/83/97°C 与 GHelper 的 30 至 100°C 网格不一致, 默认模式连同温度断点一起写入, `--keep-temps` 则在固件断点上插值
-  - 待办: 需 sudo 实际写入并用 `show` 核对转速, 异常时 `restore` 还原 pwmN_enable=2, 重启或 Fn 切平台档后可能被覆盖, 尚未建 systemd 单元
+  - 已实测应用 (2026-10-30): pwm1/2_enable=1, 8 个断点与 GHelper 完全一致, GPU 风扇 4200 降至 2400 RPM, CPU Tctl 89°C / Tccd1 86°C 在 4.9GHz 轻载下偏高, 属散热与 Zen4 移动版特性而非曲线问题
+  - systemd 落地: `asus-fan-curve.service` (multi-user.target) 与 `asus-fan-curve-resume.service` (suspend/hibernate/suspend-then-hibernate 四个 target), ExecStart 为 `~/.local/bin/asus-fan-curve-auto`, 按 platform_profile 自动选档 quiet->silent / performance->performance / 其它->balanced, 单元文件存放在 `~/.local/share/asus-fan-curve/`, 待 sudo install 到 /etc/systemd/system 后 enable
 
 - **桌面鼠标卡顿根因: 全局 PRIME offload 叠加全屏桌宠与全窗口模糊吃满 144Hz 帧预算 (2026-10-29, 已改配置待重登验证)**:
   - 现象: 鼠标移动明显卡顿, 但鼠标本体健康 (MCHOSE G3 V2 2.4G, 端点 bInterval=1ms 即 1000Hz, dmesg 无 USB 复位/断连/HID 错误)

@@ -1,0 +1,12 @@
+[Unit]
+Description=Apply Windows GHelper fan curve (ASUS TUF A16)
+After=systemd-modules-load.service multi-user.target
+ConditionPathExists=/sys/class/hwmon
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/home/sigrika/.local/bin/asus-fan-curve-auto
+
+[Install]
+WantedBy=multi-user.target

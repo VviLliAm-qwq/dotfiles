@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# asus-fan-curve-auto — 按当前平台档位选择曲线，供 systemd 调用
+# platform_profile: quiet -> silent | performance -> performance | 其它 -> balanced
+# 由 asus-fan-curve.service 与 asus-fan-curve-resume.service 以 root 调用
+set -euo pipefail
+
+P=$(cat /sys/firmware/acpi/platform_profile 2>/dev/null || echo balanced)
+case "$P" in
+  quiet)       PROF=silent ;;
+  performance) PROF=performance ;;
+  *)           PROF=balanced ;;
+esac
+
+# FORCE=1: silent 档最高点 41% 会触发过热保护，但这是老大在 Windows 上的原生曲线
+FORCE=1 exec /home/sigrika/.local/bin/asus-fan-curve "$PROF"

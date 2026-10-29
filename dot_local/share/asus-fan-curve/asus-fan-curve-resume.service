@@ -1,0 +1,10 @@
+[Unit]
+Description=Re-apply fan curve after sleep (EC resets to firmware auto)
+After=suspend.target hibernate.target hybrid-sleep.target suspend-then-hibernate.target
+
+[Service]
+Type=oneshot
+ExecStart=/home/sigrika/.local/bin/asus-fan-curve-auto
+
+[Install]
+WantedBy=suspend.target hibernate.target hybrid-sleep.target suspend-then-hibernate.target
