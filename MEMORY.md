@@ -19,11 +19,17 @@
   - 反向约束: 不要把 Mod+Ctrl+Space 写进 niri binds, niri 会先拦截, fcitx5 收不到且长按轮换 enumerate 失效
   - 生效方式 `fcitx5-remote -r`, 当前状态 2 (active), 已通过 chezmoi apply 且 status 干净
 
-- **niri 高效键位方案草案待落地 (2026-10-30, 进行中)**:
-  - 基于 niri 官方默认配置与社区 dotfiles 起草, 新增 27 项改动 1 项, 文件 `~/tmp/niri-keybinds-proposal.kdl`, 已通过 niri validate
-  - 新增重点: Mod+R 预设列宽, Mod+M 贴边最大化, Mod+Shift+1..9 单窗搬工作区, Mod+Grave 上一窗口, Mod+Page_Up/Down 工作区三件套
-  - 落地步骤: 写入 `~/.config/niri/cfg/keybinds.kdl`, 删除 `config.kdl` 末尾重复的 Mod+Print mark-shot 绑定, chezmoi re-add, 再 `niri msg action load-config-file`
-  - 保留: Mod+Ctrl+Space 归 fcitx5 输入法切换, 勿绑
+- **niri 高效键位方案全量落地 (2026-10-30, 已完成)**:
+  - 131 条绑定写入 `~/.config/niri/cfg/keybinds.kdl`, 相对旧版新增 27 项改动 1 项, 唯一破坏肌肉记忆的是 Mod+Ctrl+F 由全屏改为 expand-column-to-available-width, 全屏挪到 Mod+Shift+F
+  - 同时删除 `~/.config/niri/config.kdl` 末尾重复的 `binds { Mod+Print { spawn "mark-shot"; } }`, 避免与 keybinds 内同名绑定撞车
+  - 新增重点: Mod+R / Mod+Shift+R 预设列宽, Mod+M 贴边最大化, Mod+Ctrl+R 高度复位, Mod+Grave 上一窗口, Mod+Shift+1..9 单窗搬工作区, Mod+Page_Up/Down 工作区三件套, Mod+Shift+B 跳 bg 工作区
+  - 生效: `niri validate` 通过 + `niri msg action load-config-file` 热重载, 无需重登; 回滚备份 `~/tmp/niri-rollback-20261030-012914/`
+  - 保留: Mod+Ctrl+Space 归 fcitx5 输入法切换, 未绑进 niri
+
+- **fcitx5 候选框改为横向排列 (2026-10-30, 已完成)**:
+  - `~/.config/fcitx5/conf/classicui.conf` 的 `Vertical Candidate List` 由 True 改为 False, 已 re-add 回 chezmoi 源 `dot_config/private_fcitx5/private_conf/private_classicui.conf`
+  - 注意 `fcitx5-remote -r` 只刷全局配置, classicui 必须再 `busctl --user call org.fcitx.Fcitx5 /controller org.fcitx.Fcitx.Controller1 ReloadAddonConfig s classicui`, D-Bus 读回 False 即生效
+  - 偏差记录: live 的 Theme / DarkTheme 仍是 bamboo-dark, 与 2026-10-30 早前记录的 mellow-graphite-dark 不一致, 待用户确认是否要换回
 
 - **niri 下 fcitx5 候选框整框闪烁根因与修复 (2026-10-30, 已完成, 待 Firefox 重启验证)**:
   - 现象: 打字时候选框整框快速明灭重绘, 换皮肤 (bamboo-dark → mellow-graphite-dark) 与关闭候选框模糊均无效

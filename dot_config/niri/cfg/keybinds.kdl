@@ -1,152 +1,189 @@
 binds {
 
-    // ────────────── Keybindings ──────────────
-    // https://github.com/YaLTeR/niri/wiki/Configuration:-Key-Bindings
+    // ══════════════════════════════════════════════════════════════════════
+    // niri 高效键位方案（推荐版 · 待微调）
+    // 参考：niri 官方 default-config.kdl / noctalia 默认键位 / 社区 dotfiles
+    //   https://github.com/YaLTeR/niri/wiki/Configuration:-Key-Bindings
+    //   https://docs.noctalia.dev/getting-started/keybinds/
+    // 校验：niri validate -c ~/.config/niri/config.kdl（已通过）
+    // 应用：替换 cfg/keybinds.kdl 后执行 niri msg action load-config-file
+    // 差异：新增 27 项、改动 1 项（Mod+Ctrl+F）、删除 0 项
+    // 约定：Mod = Super；Ctrl / Shift / Alt 字面含义
+    // 保留：Mod+Ctrl+Space 已归 fcitx5 切换输入法，不要再绑进 niri（会抢在其 grab 之前拦截）
+    // ══════════════════════════════════════════════════════════════════════
 
-    // ─── noctalia-shell keybinds ───
-    // https://docs.noctalia.dev/getting-started/keybinds/
+    // ─── 帮助与总览 ───
+    Mod+Shift+Escape            { show-hotkey-overlay; }
+    Mod+Z repeat=false          { toggle-overview; }
+    Mod+O repeat=false          { toggle-overview; }            // 官方键位别名
+    Mod+Tab                     { focus-workspace-previous; }
 
-    Mod+Shift+ESCAPE                     { show-hotkey-overlay; }
+    // ─── 应用启动 ───
+    Mod+Return                  hotkey-overlay-title="终端 Ghostty" { spawn "ghostty"; }
+    Mod+D                       hotkey-overlay-title="启动器 noctalia" { spawn-sh "noctalia msg panel-toggle launcher"; }
+    Mod+Ctrl+Return             hotkey-overlay-title="启动器 noctalia" { spawn-sh "noctalia msg panel-toggle launcher"; }
+    Mod+B                       hotkey-overlay-title="浏览器 Firefox" { spawn "firefox"; }
+    Mod+E                       hotkey-overlay-title="文件管理器 Nautilus" { spawn "nautilus"; }
+    Mod+A                       hotkey-overlay-title="控制中心" { spawn-sh "noctalia msg panel-toggle control-center"; }
+    Mod+Shift+Q                 hotkey-overlay-title="会话菜单" { spawn-sh "noctalia msg panel-toggle sessionMenu"; }
+    Mod+V                       hotkey-overlay-title="剪贴板" { spawn-sh "noctalia msg panel-toggle clipboard"; }
+    Mod+Alt+L                   hotkey-overlay-title="锁屏" { spawn-sh "noctalia msg session lock"; }
+    Mod+Shift+Z                 hotkey-overlay-title="Kando 饼菜单" { spawn-sh "kando --menu Krita"; }
 
-    // ─── Applications ───
-    Mod+Return                          hotkey-overlay-title="Open Terminal: Ghostty" { spawn "ghostty"; }
-    Mod+CTRL+Return                     hotkey-overlay-title="Open App Launcher: noctalia launcher" { spawn-sh "noctalia msg panel-toggle launcher"; }
-    Mod+B                               hotkey-overlay-title="Open Browser: firefox" { spawn "firefox"; }
-    Mod+ALT+L                           hotkey-overlay-title="Lock Screen: noctalia lock" { spawn-sh "noctalia msg session lock"; }
-    Mod+Shift+Q                        hotkey-overlay-title="Session Menu: noctalia sessionMenu" { spawn-sh "noctalia msg panel-toggle sessionMenu"; }
-    Mod+A                               hotkey-overlay-title="Control Center: noctalia control-center" { spawn-sh "noctalia msg panel-toggle control-center"; }
+    // ─── 媒体与亮度（锁屏下仍可用）───
+    XF86AudioRaiseVolume        allow-when-locked=true { spawn-sh "noctalia msg volume-up"; }
+    XF86AudioLowerVolume        allow-when-locked=true { spawn-sh "noctalia msg volume-down"; }
+    XF86AudioMute               allow-when-locked=true { spawn-sh "noctalia msg volume-mute"; }
+    XF86AudioMicMute            allow-when-locked=true { spawn-sh "noctalia msg mic-mute"; }
+    XF86AudioNext               allow-when-locked=true { spawn-sh "noctalia msg media next"; }
+    XF86AudioPrev               allow-when-locked=true { spawn-sh "noctalia msg media previous"; }
+    XF86AudioPlay               allow-when-locked=true { spawn-sh "noctalia msg media toggle"; }
+    XF86AudioPause              allow-when-locked=true { spawn-sh "noctalia msg media toggle"; }
+    XF86MonBrightnessUp         allow-when-locked=true { spawn-sh "noctalia msg brightness-up"; }
+    XF86MonBrightnessDown       allow-when-locked=true { spawn-sh "noctalia msg brightness-down"; }
 
-    // Please choose your own file manager.
-    Mod+E                               hotkey-overlay-title="File Manager: Nautilus" { spawn "nautilus"; }
+    // ─── 焦点移动 ───
+    Mod+Left                    { focus-column-left; }
+    Mod+H                       { focus-column-left; }
+    Mod+Right                   { focus-column-right; }
+    Mod+L                       { focus-column-right; }
+    Mod+Up                      { focus-window-up; }
+    Mod+K                       { focus-window-up; }
+    Mod+Down                    { focus-window-down; }
+    Mod+J                       { focus-window-down; }
+    Mod+Grave                   { focus-window-previous; }       // 最近两个窗口来回切（新增）
 
-    // ─── Media Controls ───
-    XF86AudioRaiseVolume                allow-when-locked=true { spawn-sh "noctalia msg volume-up"; }
-    XF86AudioLowerVolume                allow-when-locked=true { spawn-sh "noctalia msg volume-down"; }
-    XF86AudioMute                       allow-when-locked=true { spawn-sh "noctalia msg volume-mute"; }
-    XF86AudioMicMute                    allow-when-locked=true { spawn-sh "noctalia msg mic-mute"; }
-    XF86AudioNext                       allow-when-locked=true { spawn-sh "noctalia msg media next"; }
-    XF86AudioPrev                       allow-when-locked=true { spawn-sh "noctalia msg media previous"; }
-    XF86AudioPlay                       allow-when-locked=true { spawn-sh "noctalia msg media toggle"; }
-    XF86AudioPause                      allow-when-locked=true { spawn-sh "noctalia msg media toggle"; }
+    // ─── 移动窗口 / 列 ───
+    Mod+Ctrl+Left               { move-column-left; }
+    Mod+Ctrl+H                  { move-column-left; }
+    Mod+Ctrl+Right              { move-column-right; }
+    Mod+Ctrl+L                  { move-column-right; }
+    Mod+Ctrl+Up                 { move-window-up; }
+    Mod+Ctrl+K                  { move-window-up; }
+    Mod+Ctrl+Down               { move-window-down; }
+    Mod+Ctrl+J                  { move-window-down; }
 
-    // ─── Brightness Controls ───
-    XF86MonBrightnessUp                 allow-when-locked=true { spawn-sh "noctalia msg brightness-up"; }
-    XF86MonBrightnessDown               allow-when-locked=true { spawn-sh "noctalia msg brightness-down"; }
+    Mod+Home                    { focus-column-first; }
+    Mod+End                     { focus-column-last; }
+    Mod+Ctrl+Home               { move-column-to-first; }
+    Mod+Ctrl+End                { move-column-to-last; }
 
-    // ─── Window Movement and Focus ───
-    Mod+Q                               { close-window; }
+    // ─── 多显示器 ───
+    Mod+Shift+Left              { focus-monitor-left; }
+    Mod+Shift+Right             { focus-monitor-right; }
+    Mod+Shift+Up                { focus-monitor-up; }
+    Mod+Shift+Down              { focus-monitor-down; }
+    Mod+Shift+Ctrl+Left         { move-column-to-monitor-left; }
+    Mod+Shift+Ctrl+Right        { move-column-to-monitor-right; }
+    Mod+Shift+Ctrl+Up           { move-column-to-monitor-up; }
+    Mod+Shift+Ctrl+Down         { move-column-to-monitor-down; }
 
-    Mod+Left                            { focus-column-left; }
-    Mod+H                               { focus-column-left; }
-    Mod+Right                           { focus-column-right; }
-    Mod+L                               { focus-column-right; }
-    Mod+Up                              { focus-window-up; }
-    Mod+K                               { focus-window-up; }
-    Mod+Down                            { focus-window-down; }
-    Mod+J                               { focus-window-down; }
+    // ─── 工作区 ───
+    Mod+1                       { focus-workspace 1; }
+    Mod+2                       { focus-workspace 2; }
+    Mod+3                       { focus-workspace 3; }
+    Mod+4                       { focus-workspace 4; }
+    Mod+5                       { focus-workspace 5; }
+    Mod+6                       { focus-workspace 6; }
+    Mod+7                       { focus-workspace 7; }
+    Mod+8                       { focus-workspace 8; }
+    Mod+9                       { focus-workspace 9; }
 
-    Mod+CTRL+Left                       { move-column-left; }
-    Mod+CTRL+H                          { move-column-left; }
-    Mod+CTRL+Right                      { move-column-right; }
-    Mod+CTRL+L                          { move-column-right; }
-    Mod+CTRL+UP                         { move-window-up; }
-    Mod+CTRL+K                          { move-window-up; }
-    Mod+CTRL+Down                       { move-window-down; }
-    Mod+CTRL+J                          { move-window-down; }
+    Mod+Ctrl+1                  { move-column-to-workspace 1; }
+    Mod+Ctrl+2                  { move-column-to-workspace 2; }
+    Mod+Ctrl+3                  { move-column-to-workspace 3; }
+    Mod+Ctrl+4                  { move-column-to-workspace 4; }
+    Mod+Ctrl+5                  { move-column-to-workspace 5; }
+    Mod+Ctrl+6                  { move-column-to-workspace 6; }
+    Mod+Ctrl+7                  { move-column-to-workspace 7; }
+    Mod+Ctrl+8                  { move-column-to-workspace 8; }
+    Mod+Ctrl+9                  { move-column-to-workspace 9; }
 
-    Mod+Home                            { focus-column-first; }
-    Mod+End                             { focus-column-last; }
-    Mod+CTRL+Home                       { move-column-to-first; }
-    Mod+CTRL+End                        { move-column-to-last; }
+    Mod+Shift+1                 { move-window-to-workspace 1; }  // 只搬当前窗口（新增）
+    Mod+Shift+2                 { move-window-to-workspace 2; }
+    Mod+Shift+3                 { move-window-to-workspace 3; }
+    Mod+Shift+4                 { move-window-to-workspace 4; }
+    Mod+Shift+5                 { move-window-to-workspace 5; }
+    Mod+Shift+6                 { move-window-to-workspace 6; }
+    Mod+Shift+7                 { move-window-to-workspace 7; }
+    Mod+Shift+8                 { move-window-to-workspace 8; }
+    Mod+Shift+9                 { move-window-to-workspace 9; }
 
-    Mod+Shift+Left                      { focus-monitor-left; }
-    Mod+Shift+Right                     { focus-monitor-right; }
-    Mod+Shift+UP                        { focus-monitor-up; }
-    Mod+Shift+Down                      { focus-monitor-down; }
+    Mod+Page_Up                 { focus-workspace-up; }          // 键盘上下切工作区（新增）
+    Mod+Page_Down               { focus-workspace-down; }
+    Mod+Ctrl+Page_Up            { move-column-to-workspace-up; }
+    Mod+Ctrl+Page_Down          { move-column-to-workspace-down; }
+    Mod+Shift+Page_Up           { move-window-to-workspace-up; }
+    Mod+Shift+Page_Down         { move-window-to-workspace-down; }
 
-    Mod+Shift+CTRL+Left                 { move-column-to-monitor-left; }
-    Mod+Shift+CTRL+Right                { move-column-to-monitor-right; }
-    Mod+Shift+CTRL+UP                   { move-column-to-monitor-up; }
-    Mod+Shift+CTRL+Down                 { move-column-to-monitor-down; }
+    Mod+Shift+B                 { focus-workspace "bg"; }        // 跳到后台工作区（新增）
 
-    // ─── Workspace Switching ───
-    Mod+WheelScrollDown                 cooldown-ms=150 { focus-workspace-down; }
-    Mod+WheelScrollUp                   cooldown-ms=150 { focus-workspace-up; }
-    Mod+CTRL+WheelScrollDown            cooldown-ms=150 { move-column-to-workspace-down; }
-    Mod+CTRL+WheelScrollUp              cooldown-ms=150 { move-column-to-workspace-up; }
+    // 鼠标滚轮：纵向切工作区，横向切列
+    Mod+WheelScrollDown         cooldown-ms=150 { focus-workspace-down; }
+    Mod+WheelScrollUp           cooldown-ms=150 { focus-workspace-up; }
+    Mod+Ctrl+WheelScrollDown    cooldown-ms=150 { move-column-to-workspace-down; }
+    Mod+Ctrl+WheelScrollUp      cooldown-ms=150 { move-column-to-workspace-up; }
+    Mod+WheelScrollRight        { focus-column-right; }
+    Mod+WheelScrollLeft         { focus-column-left; }
+    Mod+Ctrl+WheelScrollRight   { move-column-right; }
+    Mod+Ctrl+WheelScrollLeft    { move-column-left; }
+    Mod+Shift+WheelScrollDown   { focus-column-right; }
+    Mod+Shift+WheelScrollUp     { focus-column-left; }
+    Mod+Ctrl+Shift+WheelScrollDown { move-column-right; }
+    Mod+Ctrl+Shift+WheelScrollUp   { move-column-left; }
 
-    Mod+WheelScrollRight                { focus-column-right; }
-    Mod+WheelScrollLeft                 { focus-column-left; }
-    Mod+CTRL+WheelScrollRight           { move-column-right; }
-    Mod+CTRL+WheelScrollLeft            { move-column-left; }
+    // ─── 列与窗口结构 ───
+    Mod+BracketLeft             { consume-or-expel-window-left; }
+    Mod+BracketRight            { consume-or-expel-window-right; }
+    Mod+Comma                   { consume-window-into-column; }
+    Mod+Period                  { expel-window-from-column; }
+    Mod+C                       { center-column; }
+    Mod+Ctrl+C                  { center-visible-columns; }
 
-    Mod+Shift+WheelScrollDown           { focus-column-right; }
-    Mod+Shift+WheelScrollUp             { focus-column-left; }
-    Mod+CTRL+Shift+WheelScrollDown      { move-column-right; }
-    Mod+CTRL+Shift+WheelScrollUp        { move-column-left; }
+    // ─── 尺寸：预设比例优先，微调次之 ───
+    Mod+R                       { switch-preset-column-width; }        // 1/3 ↔ 1/2 ↔ 2/3（新增）
+    Mod+Shift+R                 { switch-preset-column-width-back; }   // 反向（新增）
+    Mod+Ctrl+R                  { reset-window-height; }               // 高度复位（新增）
+    Mod+Ctrl+Shift+R            { switch-preset-window-height; }       // 预设高度（新增）
+    Mod+Minus                   { set-column-width "-10%"; }
+    Mod+Equal                   { set-column-width "+10%"; }
+    Mod+Shift+Minus             { set-window-height "-10%"; }
+    Mod+Shift+Equal             { set-window-height "+10%"; }
 
-    Mod+1                               { focus-workspace 1; }
-    Mod+2                               { focus-workspace 2; }
-    Mod+3                               { focus-workspace 3; }
-    Mod+4                               { focus-workspace 4; }
-    Mod+5                               { focus-workspace 5; }
-    Mod+6                               { focus-workspace 6; }
-    Mod+7                               { focus-workspace 7; }
-    Mod+8                               { focus-workspace 8; }
-    Mod+9                               { focus-workspace 9; }
+    // ─── 最大化 / 全屏 ───
+    Mod+F                       { maximize-column; }                   // 最大化列（保留边距）
+    Mod+M                       { maximize-window-to-edges; }          // 真最大化，贴屏幕边缘（新增）
+    Mod+Shift+F                 { fullscreen-window; }                 // 全屏（从 Ctrl+F 迁来）
+    Mod+Ctrl+F                  { expand-column-to-available-width; }  // 吃掉剩余空间（新增）
+    Mod+Shift+M                 { toggle-windowed-fullscreen; }        // 无边框窗口化全屏（新增）
 
-    Mod+CTRL+1                          { move-column-to-workspace 1; }
-    Mod+CTRL+2                          { move-column-to-workspace 2; }
-    Mod+CTRL+3                          { move-column-to-workspace 3; }
-    Mod+CTRL+4                          { move-column-to-workspace 4; }
-    Mod+CTRL+5                          { move-column-to-workspace 5; }
-    Mod+CTRL+6                          { move-column-to-workspace 6; }
-    Mod+CTRL+7                          { move-column-to-workspace 7; }
-    Mod+CTRL+8                          { move-column-to-workspace 8; }
-    Mod+CTRL+9                          { move-column-to-workspace 9; }
+    // ─── 窗口模式 ───
+    Mod+Q                       { close-window; }
+    Mod+T                       { toggle-window-floating; }
+    Mod+Shift+V                 { switch-focus-between-floating-and-tiling; }  // 平铺/浮层焦点切换（新增）
+    Mod+W                       { toggle-column-tabbed-display; }
 
-    Mod+TAB                             { focus-workspace-previous; }
+    // ─── 截图 ───
+    Print                       { screenshot-screen; }
+    Mod+Print                   { spawn "mark-shot"; }
+    Ctrl+Shift+1                { screenshot; }
+    Ctrl+Shift+2                { screenshot-screen; }
+    Ctrl+Shift+3                { screenshot-window; }
 
-    // ─── Layout Controls ───
-    Mod+BracketLeft                     { consume-or-expel-window-left; }
-    Mod+BracketRight                    { consume-or-expel-window-right; }
-    Mod+Comma                           { consume-window-into-column; }
-    Mod+Period                          { expel-window-from-column; }
-    Mod+C                               { center-column; }
-    Mod+CTRL+C                          { center-visible-columns; }
-    Mod+Minus                           { set-column-width "-10%"; }
-    Mod+Equal                           { set-column-width "+10%"; }
-    Mod+Shift+Minus                     { set-window-height "-10%"; }
-    Mod+Shift+Equal                     { set-window-height "+10%"; }
+    // ─── 系统 ───
+    Mod+Escape                  allow-inhibiting=false { toggle-keyboard-shortcuts-inhibit; }
+    Mod+Shift+P                 { power-off-monitors; }
+    Ctrl+Alt+Delete             { quit; }
+    Mod+Shift+U                 hotkey-overlay-title="UGEE 按键桥接开关" { spawn-sh "/home/sigrika/.local/bin/ugee-bridge-toggle"; }
 
-    // ─── Modes ───
-    Mod+T                               { toggle-window-floating; }
-    Mod+F                               { maximize-column; }
-    Mod+CTRL+F                          { fullscreen-window; }
-    Mod+W                               { toggle-column-tabbed-display; }
-
-    // ─── Screenshots ───
-    Print                               { screenshot-screen; } // Quick fullscreen screenshot of focused monitor
-    CTRL+Shift+1                        { screenshot; }
-    CTRL+Shift+2                        { screenshot-screen; }
-    CTRL+Shift+3                        { screenshot-window; }
-
-    // ─── Kando Pie Menu ───
-    Mod+Shift+Z                          hotkey-overlay-title="Open Kando Menu" { spawn-sh "kando --menu Krita"; }
-
-    // ─── Emergency Escape Key ───
-    // Use this when a fullscreen app blocks your keybinds.
-    // It disables any active keyboard shortcut inhibitor, restoring control.
-    Mod+ESCAPE                          allow-inhibiting=false { toggle-keyboard-shortcuts-inhibit; }
-
-    // ─── Exit / Power ───
-    CTRL+ALT+Delete                     { quit; } // Also quits Niri
-    Mod+Shift+P                         { power-off-monitors; } // Turn off screens (useful for OLED or privacy)
-    Mod+Z                               repeat=false { toggle-overview; }
-
-    // ─── UGEE Bridge Toggle ───
-    Mod+Shift+U hotkey-overlay-title="Toggle UGEE Key Bridge" { spawn-sh "/home/sigrika/.local/bin/ugee-bridge-toggle"; }
-
-    // ─── Clipboard ───
-    Mod+V                               hotkey-overlay-title="Clipboard: noctalia clipboard" { spawn-sh "noctalia msg panel-toggle clipboard"; }
+    // ─── 可选扩展（默认关闭，需要就取消注释）───
+    // 系统级开关
+    // Mod+Shift+C              { spawn-sh "noctalia msg caffeine-toggle"; }        // 防熄屏
+    // Mod+Shift+N              { spawn-sh "noctalia msg notification-dnd-toggle"; } // 免打扰
+    // 截图增强
+    // Mod+Shift+S              { spawn-sh "noctalia msg screenshot-region"; }      // 区域截图
+    // Mod+Shift+A              { spawn-sh "noctalia msg screenshot-annotate"; }    // 圈点标注
+    // 更快的键盘工作区切换（与 Page 键二选一）
+    // Mod+U                    { focus-workspace-down; }
+    // Mod+I                    { focus-workspace-up; }
 }
