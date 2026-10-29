@@ -5,6 +5,16 @@
 
 ## 最近动态
 
+- **Opera 用户级安装与 noctalia 自动定位落地 (2026-10-30, 完成)**:
+  - Opera 139.0.6053.22 官方 deb 落在 `~/tmp/opera/`，sha512 与 AUR `opera` PKGBUILD 完全一致（`63edfc66...bdcef2`），deb 的 postinst 只做 apt 专用动作（写 /etc/cron.daily、apt keyring、update-alternatives），未执行
+  - sudo 需要密码，改为用户级部署：解包 `data.tar.zst` 到 `~/.local/opt/opera/`（371M），启动器 `~/.local/bin/opera`，桌面入口 `~/.local/share/applications/opera.desktop`，图标进 `~/.local/share/icons/hicolor`，`opera --version` 返回 139.0.6053.22
+  - 未启用 setuid `opera_sandbox`，依赖 unprivileged userns（`kernel.unprivileged_userns_clone=1`）走 namespace sandbox；升级就是重下 deb 覆盖该目录，没有自动更新
+  - 语言排查结论：系统全链路 `zh_CN.UTF-8`（/etc/locale.conf、systemd user env、niri/noctalia/fcitx5 的 /proc environ），无任何强制英文覆盖，`/usr/share/locale/zh_CN` 有 556 个翻译档；下载软件显示英文是应用自身缺翻译，非系统配置问题；Opera 首启已自动取 `zh-CN,zh`
+  - 定位链路：noctalia 的 `auto_locate` 是纯 IP 定位（`api.noctalia.dev/geolocate`），整机流量走 Clash TUN 会落到东京（35.75.19.240）从而定位成 Tokyo；已在 Clash Verge 规则覆盖 `profiles/rY2DsJMf0c0e.yaml` 的 prepend 加 `DOMAIN,api.noctalia.dev,DIRECT`
+  - 热载方式：mihomo 的 `PUT /configs` 只允许 `/var/lib/clash-verge-service/users/1000/runtime` 下的 path，故改用 `payload` 内联整份配置（unix socket `/run/clash-verge-service/users/1000/verge-mihomo.sock`），重载后规则 index 0 生效，出口变 114.86.30.123 定位 Shanghai
+  - noctalia 运行时设置真身在 `~/.local/state/noctalia/settings.toml`（chezmoi 未管理），用 `noctalia msg config-set location.auto_locate true`；chezmoi 侧 `dot_config/noctalia/settings.json` 的 autoLocate 同步置 true，`~/.cache/noctalia/location.json` 已显示 source_label 自动
+  - 备份：Clash Verge 数据目录内 `clash-verge.yaml.bak-20261030`
+
 - **OBS Studio 安装与旧配置修复 (2026-10-30, 完成)**:
   - 官方仓库 `obs-studio 33.0.0-1.1`，同时安装 `cef`、`libdatachannel`、`libjuice`、`qrcodegencpp-cmake`、`rnnoise`，snapper 快照 31-32
   - 旧 chezmoi 配置 `basic.ini` 的 `[AdvOut] RecEncoder=obs_qsv11_v2` 在本机（AMD 7940HX + RTX 4060）不存在，启动弹「以下已配置的编码器缺失」；已在 chezmoi 源改为 `obs_x264` 并 apply，主界面与编码器列表正常
