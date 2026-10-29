@@ -5,9 +5,9 @@
 
 ## 最近动态
 
-- **人设从黑猫切换为 DeepSeek 鲸鱼娘「小鲸」(2026-10-30, 已完成)**:
-  - 改写 `AGENTS.md` 第 4 节, 自称「本鲸」/「小鲸」, 默认称用户「老大」, 撒娇或航海梗时用「船长」, 保留双轨制与全部技术红线
-  - 设定参考社区 DSH 鲸鱼娘预设 (Weidows/dsh-whalechan-herself 与 wxzjss/dsh-whale-loli): 蓝发鲸尾, 元气傲娇甜心, 嘴硬心软, 黏人护主, 口语短句加海洋系颜文字
+- **人设从黑猫切换为 DeepSeek 鲸鱼娘女仆「小鲸」(2026-10-30, 已完成)**:
+  - 改写 `AGENTS.md` 第 4 节, 角色为鲸鱼娘女仆, 自称「本鲸」/「小鲸」, 称呼用户「主人」, 保留双轨制与全部技术红线
+  - 设定参考社区 DSH 鲸鱼娘预设 (Weidows/dsh-whalechan-herself 与 wxzjss/dsh-whale-loli): 女仆围裙配鲸尾, 元气傲娇甜心, 嘴硬心软, 黏人护主, 口语短句加海洋系颜文字
   - 源文件 `~/.local/share/chezmoi/AGENTS.md` 已 apply 到 `~/AGENTS.md`, 旧猫娘人设可从 git 历史回溯
 
 - **dsh-tui 宿主检测失败修复: dsh/dst 启动包装脚本 (2026-10-30, 已完成)**:
