@@ -5,6 +5,15 @@
 
 ## 最近动态
 
+- **ASUS TUF A16 风扇曲线从 Windows GHelper 移植到 Linux (2026-10-30, 待 root 应用)**:
+  - 机型 ASUSTeK TUF Gaming A16 FA607PV, 内核 asus-armoury 暴露 hwmon `asus_custom_fan_curve` (8 点 × 2 风扇), firmware-attributes 另有 `gpu_mux_mode` / `dgpu_disable` / `nv_tgp` / `nv_dynamic_boost` / `nv_temp_target` / `panel_overdrive`
+  - 顺带纠正硬件拓扑: 本机核显为 amdgpu (Radeon 610M, card1), 无 i915, 内屏 eDP-2 与 HDMI-A-1 均挂在 card2=nvidia, niri 与 noctalia 都渲染在 renderD129 即独显, 与 2026-10-29 条目里 i915 的描述不符
+  - GHelper 配置在 Windows 分区 `Users/woshi/AppData/Roaming/GHelper/config.json`, 字段 `fan_profile_{cpu,gpu}_{0,1,2}` 为 16 字节十六进制: 前 8 字节温度(°C) 后 8 字节占空比(%), 按功耗墙判定 0=Balanced(40W) 1=Performance(50W/85W) 2=Silent(35W/40W)
+  - Windows 分区本次只读临时挂载在 `/run/media/sigrika/OS`, 读完即卸载, 未写入任何内容
+  - 落地脚本 `~/.local/bin/asus-fan-curve` (chezmoi 托管), 子命令 show / restore / balanced|performance|silent, 支持 `--keep-temps` 与 `--dry-run`, 占空比按 % × 255 ÷ 100 换算
+  - 断点差异: 固件现存断点 63/70/73/73/78/78/83/97°C 与 GHelper 的 30 至 100°C 网格不一致, 默认模式连同温度断点一起写入, `--keep-temps` 则在固件断点上插值
+  - 待办: 需 sudo 实际写入并用 `show` 核对转速, 异常时 `restore` 还原 pwmN_enable=2, 重启或 Fn 切平台档后可能被覆盖, 尚未建 systemd 单元
+
 - **桌面鼠标卡顿根因: 全局 PRIME offload 叠加全屏桌宠与全窗口模糊吃满 144Hz 帧预算 (2026-10-29, 已改配置待重登验证)**:
   - 现象: 鼠标移动明显卡顿, 但鼠标本体健康 (MCHOSE G3 V2 2.4G, 端点 bInterval=1ms 即 1000Hz, dmesg 无 USB 复位/断连/HID 错误)
   - 硬证据: 面板 eDP-1 挂在 card1=i915 核显且 niri 合成在 renderD128 核显, 但整个用户会话被 `~/.config/environment.d/nvidia.conf` 与 niri config.kdl 双重注入 `__NV_PRIME_RENDER_OFFLOAD=1` / `__GLX_VENDOR_LIBRARY_NAME=nvidia` / `__VK_LAYER_NV_optimus=NVIDIA_only` / `DRI_PRIME=pci-0000:01:00.0`, 于是 zen/steam/Bettbox/ghostty/noctalia 全部持有 card0(10de) 图形上下文, 独显长期停在 P5 / 472-607MHz

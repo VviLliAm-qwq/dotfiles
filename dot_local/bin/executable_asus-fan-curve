@@ -1,0 +1,140 @@
+#!/usr/bin/env bash
+# asus-fan-curve — 把 Windows 上 GHelper 的风扇曲线搬到 Linux
+# 数据来源: C:\Users\woshi\AppData\Roaming\GHelper\config.json
+#           fan_profile_{cpu,gpu}_{0,1,2} = 8×温度(°C) + 8×占空比(%)
+#
+# 用法:
+#   sudo asus-fan-curve show                  # 打印当前曲线
+#   sudo asus-fan-curve balanced              # 应用（含温度断点，和 Windows 一致）
+#   sudo asus-fan-curve balanced --keep-temps # 只改占空比，沿用固件的温度断点
+#   sudo asus-fan-curve balanced --dry-run    # 只打印将要写入的值
+#   sudo asus-fan-curve restore               # 交回固件自动控制
+set -euo pipefail
+
+# ── 曲线数据（profile: cpu_temps|cpu_duty|gpu_temps|gpu_duty） ──
+declare -A CURVE=(
+  [balanced]="30 48 59 69 79 89 95 100|0 3 6 13 27 31 52 92|30 49 59 69 79 89 95 100|0 3 7 12 23 37 57 91"
+  [performance]="30 40 58 68 79 86 90 100|0 10 20 28 57 67 83 90|30 40 58 68 79 86 90 100|0 14 20 40 59 74 84 91"
+  [silent]="30 50 59 69 75 84 92 100|0 1 6 8 19 19 27 41|30 50 58 68 78 87 92 100|0 1 4 9 15 25 43 50"
+)
+
+die() { echo "错误: $*" >&2; exit 1; }
+
+find_hwmon() {
+  local m
+  m=$(grep -l '^asus_custom_fan_curve$' /sys/class/hwmon/hwmon*/name 2>/dev/null | head -1) || true
+  [[ -n "$m" ]] || die "找不到 asus_custom_fan_curve（内核 asus-armoury 没暴露，检查内核版本/机型）"
+  dirname "$m"
+}
+
+pct_to_pwm() { local p=$1; echo $(( (p * 255 + 50) / 100 )); }
+
+show_curve() {
+  local hw; hw=$(find_hwmon)
+  echo "设备: $hw"
+  echo "pwm1_enable=$(cat "$hw/pwm1_enable")  pwm2_enable=$(cat "$hw/pwm2_enable")  (1=自定义曲线 2=固件自动)"
+  printf '%-3s %-13s %-15s %-13s %s\n' "#" "CPU温度" "CPU PWM(占空比)" "GPU温度" "GPU PWM(占空比)"
+  for i in 1 2 3 4 5 6 7 8; do
+    local ct cp gt gp
+    ct=$(cat "$hw/pwm1_auto_point${i}_temp"); cp=$(cat "$hw/pwm1_auto_point${i}_pwm")
+    gt=$(cat "$hw/pwm2_auto_point${i}_temp"); gp=$(cat "$hw/pwm2_auto_point${i}_pwm")
+    printf '%-3s %-8s %3s (%3d%%)   %-8s %3s (%3d%%)\n' \
+      "$i" "${ct}°C" "$cp" "$(( cp * 100 / 255 ))" "${gt}°C" "$gp" "$(( gp * 100 / 255 ))"
+  done
+  echo
+  local f
+  f=$(grep -l '^asus$' /sys/class/hwmon/hwmon*/name 2>/dev/null | head -1 || true)
+  if [[ -n "$f" ]]; then
+    echo "当前转速: CPU $(cat "$(dirname "$f")/fan1_input" 2>/dev/null || echo '?') RPM / GPU $(cat "$(dirname "$f")/fan2_input" 2>/dev/null || echo '?') RPM"
+  fi
+}
+
+# 在给定曲线上按温度插值出占空比（用于 --keep-temps）
+interp() {
+  local -n ts=$1 ds=$2
+  local t=$3 n=${#ts[@]} i
+  (( t <= ts[0] )) && { echo "${ds[0]}"; return; }
+  (( t >= ts[n-1] )) && { echo "${ds[n-1]}"; return; }
+  for ((i=0; i<n-1; i++)); do
+    if (( t >= ts[i] && t <= ts[i+1] )); then
+      local span=$(( ts[i+1] - ts[i] ))
+      (( span == 0 )) && { echo "${ds[i]}"; return; }
+      local num=$(( ds[i] * (ts[i+1] - t) + ds[i+1] * (t - ts[i]) ))
+      echo $(( (num + span/2) / span ))
+      return
+    fi
+  done
+}
+
+apply_curve() {
+  local name=$1 keep_temps=$2 dry=$3
+  local -a ct cp gt gp
+  IFS='|' read -r -a parts <<< "${CURVE[$name]}"
+  read -r -a ct <<< "${parts[0]}"; read -r -a cp <<< "${parts[1]}"
+  read -r -a gt <<< "${parts[2]}"; read -r -a gp <<< "${parts[3]}"
+
+  local hw; hw=$(find_hwmon)
+
+  if [[ $keep_temps == 1 ]]; then
+    local -a ot og
+    for i in 1 2 3 4 5 6 7 8; do
+      ot+=("$(cat "$hw/pwm1_auto_point${i}_temp")")
+      og+=("$(cat "$hw/pwm2_auto_point${i}_temp")")
+    done
+    local -a np nq
+    for i in "${ot[@]}"; do np+=("$(interp ct cp "$i")"); done
+    for i in "${og[@]}"; do nq+=("$(interp gt gp "$i")"); done
+    ct=("${ot[@]}"); cp=("${np[@]}"); gt=("${og[@]}"); gp=("${nq[@]}")
+  fi
+
+  # 安全检查：满温时占空比过低会过热
+  if (( $(pct_to_pwm "${cp[7]}") < 128 || $(pct_to_pwm "${gp[7]}") < 128 )) && [[ ${FORCE:-0} != 1 ]]; then
+    echo "警告: 最高温点占空比 CPU=${cp[7]}% GPU=${gp[7]}%（低于 50%），确认要写吗？" >&2
+    echo "      确认请加 FORCE=1 前缀重跑。" >&2
+    exit 2
+  fi
+
+  local mode_desc="温度断点同 Windows"
+  [[ $keep_temps == 1 ]] && mode_desc="沿用固件温度断点"
+  echo ">>> 应用 $name 曲线（$mode_desc）"
+  for i in 1 2 3 4 5 6 7 8; do
+    local idx=$((i-1))
+    printf '  point%d: CPU %3s°C/%3d    GPU %3s°C/%3d\n' \
+      "$i" "${ct[$idx]}" "$(pct_to_pwm "${cp[$idx]}")" "${gt[$idx]}" "$(pct_to_pwm "${gp[$idx]}")"
+  done
+
+  if [[ $dry == 1 ]]; then echo "(dry-run，未写入)"; return; fi
+  [[ $EUID -eq 0 ]] || die "需要 root：请用 sudo 运行"
+
+  # 关掉自动模式 → 写曲线 → 打开自定义曲线模式
+  echo 2 > "$hw/pwm1_enable"; echo 2 > "$hw/pwm2_enable"
+  for i in 1 2 3 4 5 6 7 8; do
+    local idx=$((i-1))
+    echo "${ct[$idx]}" > "$hw/pwm1_auto_point${i}_temp"
+    echo "$(pct_to_pwm "${cp[$idx]}")" > "$hw/pwm1_auto_point${i}_pwm"
+    echo "${gt[$idx]}" > "$hw/pwm2_auto_point${i}_temp"
+    echo "$(pct_to_pwm "${gp[$idx]}")" > "$hw/pwm2_auto_point${i}_pwm"
+  done
+  echo 1 > "$hw/pwm1_enable"; echo 1 > "$hw/pwm2_enable"
+  echo "完成。用 'asus-fan-curve show' 核对，'asus-fan-curve restore' 可还原。"
+}
+
+case "${1:-show}" in
+  show) show_curve ;;
+  restore)
+    [[ $EUID -eq 0 ]] || die "需要 root：请用 sudo 运行"
+    hw=$(find_hwmon); echo 2 > "$hw/pwm1_enable"; echo 2 > "$hw/pwm2_enable"
+    echo "已交回固件自动控制。" ;;
+  -h|--help) sed -n '2,12p' "$0" ;;
+  *)
+    [[ -n "${CURVE[$1]:-}" ]] || die "未知配置 '$1'（可选: balanced | performance | silent）"
+    keep=0; dry=0
+    for a in "${@:2}"; do
+      case $a in
+        --keep-temps) keep=1 ;;
+        --dry-run) dry=1 ;;
+        *) die "未知参数 $a" ;;
+      esac
+    done
+    apply_curve "$1" "$keep" "$dry" ;;
+esac
