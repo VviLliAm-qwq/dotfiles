@@ -1,0 +1,4 @@
+#!/bin/sh
+# Opera 浏览器 用户级启动器（安装位置 ~/.local/opt/opera，无 root 依赖）
+# 升级：重新下载官方 deb 解包覆盖 ~/.local/opt/opera 即可
+exec "$HOME/.local/opt/opera/opera" "$@"

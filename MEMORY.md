@@ -5,6 +5,13 @@
 
 ## 最近动态
 
+- **OBS Studio 安装与旧配置修复 (2026-10-30, 完成)**:
+  - 官方仓库 `obs-studio 33.0.0-1.1`，同时安装 `cef`、`libdatachannel`、`libjuice`、`qrcodegencpp-cmake`、`rnnoise`，snapper 快照 31-32
+  - 旧 chezmoi 配置 `basic.ini` 的 `[AdvOut] RecEncoder=obs_qsv11_v2` 在本机（AMD 7940HX + RTX 4060）不存在，启动弹「以下已配置的编码器缺失」；已在 chezmoi 源改为 `obs_x264` 并 apply，主界面与编码器列表正常
+  - 可用视频编码器：`obs_x264`、`obs_nvenc_h264_tex`、`obs_nvenc_hevc_tex`、`obs_nvenc_av1_tex`、`ffmpeg_vaapi_tex`；Wayland 会话，PipeWire 屏幕捕获由 `xdg-desktop-portal-wlr` 提供，首次添加源时再授权
+  - 日志有 `Unable to open DRM render node` 与 llvmpipe 回退，暂不影响启动与编码器注册，后续如预览卡顿再处理 EGL/NVIDIA 渲染路径
+  - 测试时误杀 OBS 生成 `.sentinel` 崩溃标记，已清理，正常关闭后无残留
+
 - **niri 截图键改为 Win+Shift+S (2026-10-30, 已完成, 待实键验证)**:
   - 现状: 旧主截图键 `Mod+Print` 调用 `mark-shot`，但该包已从系统移除（`/usr/bin/mark-shot` 不存在，`pacman -Q mark-shot` 报未找到），该绑定实际失效
   - 变更: `~/.config/niri/cfg/keybinds.kdl` 删除死绑定，新增 `Mod+Shift+S` 调 `noctalia msg screenshot-region`（Win+Shift+S 手感，Noctalia 常驻在线），`Print` 全屏与 `Ctrl+Shift+1/2/3` 原生截图保留
@@ -1096,7 +1103,7 @@
 - Fcitx5：bamboo-dark 皮肤（morandi-gen 注入），竖排候选，rime_ice（雾凇拼音）；支持 niri ext-background-effect 候选框模糊
 - Fastfetch：write_fastfetch 全量生成 config.jsonc；源码中 ≥U+F0000 码点必须使用 8 位 `\U000FXXXX` 转义
 - Noctalia 重启：`pkill -f noctalia` 后 `setsid nohup noctalia > ~/tmp/noctalia-restart.log 2>&1 < /dev/null & disown`
-- OBS：屏幕采集依赖 mesa EGL 核显渲染（强制覆盖 desktop Exec：`env -u __NV_PRIME_RENDER_OFFLOAD -u __GLX_VENDOR_LIBRARY_NAME __EGL_VENDOR_LIBRARY_FILENAMES=/usr/share/glvnd/egl_vendor.d/50_mesa.json obs`）；编码器使用核显 QSV（`obs_qsv11_v2`）；B 站推流插件位于 `~/.config/obs-studio/plugins/bilibili-stream-for-obs/`（含 PR #27 扫码登录补丁）
+- OBS：桌面项与 `~/.local/bin/obs` 包装强制 Mesa EGL，但 OBS 33 在当前 niri 会话仍回退 llvmpipe（日志 `Unable to open DRM render node`），编码器默认 `obs_x264`，NVENC/VAAPI 可用，旧 QSV 配置已移除；B 站推流插件已不在磁盘，若需要重新安装
 - Caelestia KDE Shell：KWin 6.7.4 + caelestia-shell 2.4.0 精简安装，配置位于 `~/.config/quickshell/caelestia/`，会话 `~/.local/bin/start-kwin-caelestia.sh`；缩略图依赖 PipeWire，nvidia.conf 严禁设全局 PRIME offload 变量防黑屏
 - 显卡策略：默认全部走核显，严禁在 `environment.d/nvidia.conf` 或 niri `environment` 段设全局 PRIME offload（面板与合成器都在核显，全局强制独显会让每帧跨 GPU 拷贝并吃掉 144Hz 帧预算）；需要独显用 `prime-run` 前缀，桌面项覆盖见 `~/.local/share/applications/` 下的 blender / org.kde.krita / DaVinciResolve / com.lunarclient.LunarClient
 - Zen 浏览器 (Flatpak)：2026-10-29 已用 `flatpak override --user --unset-env` 去掉 `__NV_PRIME_RENDER_OFFLOAD` / `__GLX_VENDOR_LIBRARY_NAME` / `VK_ICD_FILENAMES`，改走 Mesa 核显；user.js 仍启用 `layers.dmabuf.disable=true` 防止 2D canvas 合成失效；D-Bus portal 授权只读访问 fcitx5 目录
@@ -1155,6 +1162,7 @@
 ## 安装与服务
 
 - **微信 / QQ / Steam / 网易云音乐**：微信 `wechat-universal-bwrap 4.1.13.26-1`（bwrap 沙箱，数据 `~/文档/WeChat_Data`，退出 `/usr/lib/wechat-universal/stop.sh`）；QQ `linuxqq 5:3.2.34_53644-1`（未沙箱，配置 `~/.config/QQ`）；Steam `steam 1.0.0.87-3`（数据 `~/.local/share/Steam`，已有登录数据）；网易云 `netease-cloud-music-gtk4 2.5.4-2`（第三方 GTK4 客户端）
+- **OBS Studio**：官方仓库 `obs-studio 33.0.0-1.1`；配置由 chezmoi 管理，旧 `RecEncoder=obs_qsv11_v2` 已改为 `obs_x264`；桌面项与 `~/.local/bin/obs` 包装强制 Mesa EGL，Wayland 屏幕捕获走 PipeWire，编码器含 NVENC/VAAPI/x264
 - **nanoMuse**：v1.0.5 跨设备 Agent；桌面端 AppImage 部署于 `~/.local/opt/nanomuse/nanoMuse.AppImage`，CLI 链接 `~/.local/bin/nanomuse`，桌面项 `nanomuse.desktop`；手机与平板端均通过 ADB 部署 `io.github.nanomuse.app` 并注入电池优化白名单
 - **网易 UU 远程被控端 (uu-remote-linux)**：社区原生 Rust 被控端（`/usr/bin/uuremote-server`，集成 `--features wayland,portal`）；用户服务 `uu-remote-native.service`（自启常驻，支持 Wayland 活跃 Socket 自动探测与重载自愈）；依赖 `/dev/uinput` 与 `xdg-desktop-portal`；凭据存储于 `~/.config/uuremote/config.json`；支持官方客户端扫码登录绑定
 - **Bettbox & FlClash**：AUR 包 `bettbox-bin 1.19.3-1` 与 `flclash-bin 0.8.93-1`；数据位于 `~/.local/share/com.appshub.bettbox/`；BettboxCore 内置 SUID root 免密启动 TUN；保留双客户端共存
