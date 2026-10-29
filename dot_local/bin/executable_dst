@@ -1,0 +1,11 @@
+#!/bin/sh
+# dsh-tui 启动包装：dsh-http-proxy 仅支持 http:// 与 https:// 代理协议
+# 原生宿主在进程内安装代理策略时直接读启动环境，不经过 dsh 包装脚本，
+# 所以这里也过滤一次 SOCKS 协议变量，避免 dsh-tui 启动告警
+if [ -n "$all_proxy" ] && [ "${all_proxy#socks}" != "$all_proxy" ]; then
+    unset all_proxy
+fi
+if [ -n "$ALL_PROXY" ] && [ "${ALL_PROXY#socks}" != "$ALL_PROXY" ]; then
+    unset ALL_PROXY
+fi
+exec "$HOME/.npm-global/bin/dst" "$@"

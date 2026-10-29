@@ -43,6 +43,8 @@
   "outline": "#6b6a63",
   "outline_variant": "#6c6a61",
   "shadow": "#21201c",
+  "hover": "#d5d8d0",
+  "on_hover": "#22211c",
   "scrim": "#000000",
   "inverse_surface": "#e7e6e4",
   "inverse_on_surface": "#272725",

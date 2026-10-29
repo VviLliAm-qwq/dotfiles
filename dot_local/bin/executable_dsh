@@ -1,10 +1,14 @@
 #!/bin/sh
-# DSH SOCKS 代理过滤：dsh-http-proxy 仅支持 http:// 与 https:// 代理协议
+# DSH 启动包装：dsh-http-proxy 仅支持 http:// 与 https:// 代理协议
 # 过滤 SOCKS 协议变量以避免启动告警，同时保留 http_proxy/https_proxy 正常生效
+# 注意：dsh-tui 要从本脚本里解析出可跟随的 .js 宿主入口才会走原生宿主
+# （${basedir} 是它认的 npm/pnpm shim 约定），只写 exec $HOME/.npm-global/bin/dsh
+# 会让它判定“启动器无法跟随”，退回 dsh --profile 并打印告警
 if [ -n "$all_proxy" ] && [ "${all_proxy#socks}" != "$all_proxy" ]; then
     unset all_proxy
 fi
 if [ -n "$ALL_PROXY" ] && [ "${ALL_PROXY#socks}" != "$ALL_PROXY" ]; then
     unset ALL_PROXY
 fi
-exec "$HOME/.npm-global/bin/dsh" "$@"
+basedir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd) || exit 1
+exec node "${basedir}/../../.npm-global/lib/node_modules/@deepseek-ai/dsh/lib/bin.js" "$@"

@@ -5,6 +5,14 @@
 
 ## 最近动态
 
+- **dsh-tui 宿主检测失败修复: dsh/dst 启动包装脚本 (2026-10-30, 已完成)**:
+  - 现象: 每次 `dst` 启动打印 `dsh-tui: the installed dsh cannot host this launch (/home/sigrika/.local/bin/dsh is a launcher script that starts no @deepseek-ai/dsh script found on disk); starting DSH through dsh --profile`, 界面顶部另留一条 "Not using the installed dsh" 提示
+  - 根因: dsh-tui 的 `findHostDsh` 取 PATH 上第一个 `dsh`, 再从启动器脚本里找可解析的 `.js` 入口 (仅接受字面绝对路径或 `${basedir}` / `$(dirname "$0")` / `%~dp0%` / `$PSScriptRoot` 前缀, 见 host-dsh.js 的 launcherScriptPaths 与 resolveLauncherPath); 旧包装只写了 `exec "$HOME/.npm-global/bin/dsh"`, `$HOME` 无法解析 → 判定启动器不可跟随 → 回退 `dsh --profile` 子进程
+  - 修复: `~/.local/bin/dsh` 改为先 `basedir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)` 再 `exec node "${basedir}/../../.npm-global/lib/node_modules/@deepseek-ai/dsh/lib/bin.js"`, SOCKS 变量过滤保留
+  - 配套: 新增 `~/.local/bin/dst` 包装, 过滤 SOCKS 后 exec `$HOME/.npm-global/bin/dst`; 原生宿主在进程内调用 `installProxyFromEnvironment` 读启动环境, 不经过 dsh 包装, 不挡一次就会重新出现 `dsh: all_proxy names a SOCKS proxy` 告警
+  - 验证: `findHostDsh()` 返回 `{packageDir: /home/sigrika/.npm-global/lib/node_modules/@deepseek-ai/dsh, via: "shim"}`; `dsh --version` 与 `dst doctor` 正常; pty 内带或不带 `all_proxy=socks5://127.0.0.1:7897` 启动均无告警, 直接进 TUI
+  - 遗留: `dsh-tui` 同名命令未包装 (仍走 npm 链接), 只有 SOCKS 会话下才可能重现代理告警; 旧脚本备份 `~/tmp/dsh-wrapper-backup-20261030-012034.sh`
+
 - **niri 下 fcitx5 候选框整框闪烁根因与修复 (2026-10-30, 已完成, 待 Firefox 重启验证)**:
   - 现象: 打字时候选框整框快速明灭重绘, 换皮肤 (bamboo-dark → mellow-graphite-dark) 与关闭候选框模糊均无效
   - 根因: GTK3 应用被强制走 fcitx5-gtk IM 模块 (`GTK_IM_MODULE=fcitx` 与 `~/.config/gtk-3.0/settings.ini` 的 `gtk-im-module=fcitx`), niri 下该模块每次按键重绘 popup 触发闪烁, 与皮肤无关; 上游 niri#4402 结论一致 (Firefox 与 GTK 应用复现, Chromium/Kate 不复现)
@@ -1118,7 +1126,7 @@
 - **MicYou**：本地包 `micyou 2.0.0.alpha.1-1`；Noctalia 插件开源于 `lanrhyme/micyou`；手机端安装于 K60；ufw 放行 8554/tcp、8555/udp、8443/tcp、5353/udp
 - **企业微信**：deepin Wine 版 `com.qq.weixin.work.deepin`，容器位于 `~/.deepinwine/Deepin-WXWork`，启动脚本 `/opt/apps/com.qq.weixin.work.deepin/files/run.sh`
 - **Waydroid**：Android 16 (LineageOS 23.2)，开启 Intel iGPU/GBM 加速；依赖 UFW 规则 `sudo ufw allow in on waydroid0`；脚本位于 `~/tmp/a16/`
-- **DeepSeek Harness**：AUR 包 `deepseek-harness-bin 0.2.0rc.2-1`（`/usr/bin/dsh`）；Superpower 预设位于 `~/.dsh/.agent-presets/superpower/`；LLM 路由配置在 `~/.dsh/settings.yaml` 的 `llm-pi-ai.providers`（密钥只存 `~/.dsh/.credentials.yaml`）；接入 WFClub 中转 `https://api.wfclub.fun/v1`（route `openai`，默认模型 `deepseek-ai/DeepSeek-V4.1-Flash`，显式添加 `input: [text, image]` 开启识图）
+- **DeepSeek Harness**：当前由 npm 全局安装（`@deepseek-ai/dsh@0.2.1-rc.5`，入口 `~/.npm-global/bin/dsh`）；`~/.local/bin/dsh` 与 `~/.local/bin/dst` 是 chezmoi 托管的启动包装，负责过滤 dsh-http-proxy 不支持的 SOCKS 变量，且 dsh 包装必须是 dsh-tui 可跟随的启动器（否则回退 `dsh --profile` 并告警）；Superpower 预设位于 `~/.dsh/.agent-presets/superpower/`；LLM 路由配置在 `~/.dsh/settings.yaml` 的 `llm-pi-ai.providers`（密钥只存 `~/.dsh/.credentials.yaml`）；接入 WFClub 中转 `https://api.wfclub.fun/v1`（route `openai`，默认模型 `deepseek-ai/DeepSeek-V4.1-Flash`，显式添加 `input: [text, image]` 开启识图）
 - **Antigravity**：AUR 包滞后需手动维护（本地 2.9.1，构建于 `~/tmp/antigravity-pkgbuild/`）；网络直连易超时，依赖 FlClash TUN 透明代理正常连通；CLI 为 `~/.local/bin/agy`
 - **CodeBuddy IDE**：AUR 包 `codebuddy-ide-cn 4.12.0.37847260-1`，腾讯云代码助手独立桌面客户端，命令 `codebuddy-ide-cn`
 - **WorkBuddy**：Electron 44 架构，`~/.workbuddy/app/gpu-crash-info.json` 软链接至 `/dev/null` 切断 GPU 降级死锁；`electron44-flags.conf` 配置 Ozone Wayland 原生 GPU 合成
@@ -1151,3 +1159,4 @@
   - 2. **Zygisk Next 黑名单排查**：若应用无法加载模块，核对 `/data/adb/ksu/bin/znctl status` 中的 `enforce_denylist`，必须执行 `znctl enforce-denylist disabled`（置 0）以防应用被跳过注入
   - 3. **Vector 守护进程**：若 `cli status` 报 Socket Failure，检查 `service.sh` 中是否残留 toybox 不支持的 `unshare --propagation slave`，统一修正为 `unshare -m`
   - 4. **Xposed 模块兼容性**：旧模块若写死判断 `SDK_INT <= 36` 会抛出 NPE（如 Thanox），需停用或反编译 smali 将 SDK 版本识别限制在 36 并做判空保护；相机等 OEM 应用小版本更新可能会变更混淆字段名，需同步反编译更新 Hook 点
+- **dsh-tui 宿主检测**：`PATH` 上第一个 `dsh` 必须是 `@deepseek-ai/dsh` 本体（npm 软链）或能被跟随的启动器，启动脚本里要出现可解析的 `.js` 入口，前缀只认字面绝对路径、`${basedir}`、`$(dirname "$0")`、`%~dp0%`、`$PSScriptRoot`，`$HOME` 一类变量一律判为不可跟随并回退 `dsh --profile`（同时打印 "cannot host this launch"）；原生宿主在进程内装代理策略、不经过 `dsh` 包装脚本，所以 SOCKS 变量过滤必须同时放在 `dsh` 与 `dst` 两个入口

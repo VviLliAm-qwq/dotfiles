@@ -25,6 +25,6 @@ fi
 
 if ! git diff --cached --quiet 2>/dev/null || ! git diff --quiet 2>/dev/null || [ -n "$(git ls-files --others --exclude-standard)" ]; then
     git add -A
-    git commit -m "auto: $(date +%F-%T)" >>"$LOG" 2>&1
+    git commit -m "chore: 自动同步 dotfiles $(date +%F-%T)" >>"$LOG" 2>&1
     git push origin master >>"$LOG" 2>&1
 fi
