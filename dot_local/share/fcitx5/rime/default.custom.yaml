@@ -1,4 +1,7 @@
 patch:
+  # 默认使用雾凇拼音（简体）
+  schema_list:
+    - schema: rime_ice
   # 菜单
   menu:
     page_size: 8  # 候选词个数

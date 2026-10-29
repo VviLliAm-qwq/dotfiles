@@ -5,7 +5,7 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/dufs -c /home/lanrhyme/.config/dufs/config.yaml
+ExecStart=/usr/bin/dufs -c /home/sigrika/.config/dufs/config.yaml
 Restart=always
 RestartSec=5
 

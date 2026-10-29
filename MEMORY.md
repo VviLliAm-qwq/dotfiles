@@ -5,6 +5,13 @@
 
 ## 最近动态
 
+- **niri 下 fcitx5 候选框整框闪烁根因与修复 (2026-10-30, 已完成, 待 Firefox 重启验证)**:
+  - 现象: 打字时候选框整框快速明灭重绘, 换皮肤 (bamboo-dark → mellow-graphite-dark) 与关闭候选框模糊均无效
+  - 根因: GTK3 应用被强制走 fcitx5-gtk IM 模块 (`GTK_IM_MODULE=fcitx` 与 `~/.config/gtk-3.0/settings.ini` 的 `gtk-im-module=fcitx`), niri 下该模块每次按键重绘 popup 触发闪烁, 与皮肤无关; 上游 niri#4402 结论一致 (Firefox 与 GTK 应用复现, Chromium/Kate 不复现)
+  - 处置: niri `environment` 段注释 `GTK_IM_MODULE`; gtk-3.0 / gtk-4.0 `settings.ini` 注释 `gtk-im-module`; noctalia 用干净环境重启; fcitx5 重启; 候选皮肤换成 mellow-graphite-dark (来自 github.com/sanweiya/fcitx5-mellow-themes, 已收进 chezmoi 的 dot_local/share/fcitx5/themes)
+  - 验证: niri spawn 的无 GTK_IM_MODULE 测试窗打字不闪; 00:25 启动的旧 Firefox 仍带旧变量, 必须完全退出重启后再验证
+  - 回滚: 恢复上述两处注释即回到模块路径; 皮肤把 classicui.conf 的 Theme / DarkTheme 改回 bamboo-dark
+
 - **ASUS TUF A16 风扇曲线从 Windows GHelper 移植到 Linux (2026-10-30, 待 root 应用)**:
   - 机型 ASUSTeK TUF Gaming A16 FA607PV, 内核 asus-armoury 暴露 hwmon `asus_custom_fan_curve` (8 点 × 2 风扇), firmware-attributes 另有 `gpu_mux_mode` / `dgpu_disable` / `nv_tgp` / `nv_dynamic_boost` / `nv_temp_target` / `panel_overdrive`
   - 顺带纠正硬件拓扑: 本机核显为 amdgpu (Radeon 610M, card1), 无 i915, 内屏 eDP-2 与 HDMI-A-1 均挂在 card2=nvidia, niri 与 noctalia 都渲染在 renderD129 即独显, 与 2026-10-29 条目里 i915 的描述不符

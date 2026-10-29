@@ -10,7 +10,6 @@ patch:
     - lua_filter@*pin_cand_filter
     - lua_filter@*long_word_filter
     - lua_filter@*reduce_english_filter
-    - lua_filter@*zh2en_filter
     - simplifier@traditionalize
     - lua_filter@*search@radical_pinyin
     - uniquifier
@@ -23,9 +22,6 @@ patch:
       states: [ ¥, $ ]
     - name: traditionalization
       states: [ 简, 繁 ]
-    - name: zh2en
-      states: [ 译关, 译开 ]
-      reset: 1
     - name: full_shape
       states: [ 半角, 全角 ]
     - name: search_single_char

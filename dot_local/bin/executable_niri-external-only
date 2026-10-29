@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+# 外接屏优先：HDMI-A-1 启用时关闭笔记本内置屏（eDP-2）；
+# 外接屏断开/关闭时自动把内置屏恢复成配置里的 165Hz，避免拔线后黑屏。
+#
+# 由 niri 的 spawn-at-startup 拉起（见 ~/.config/niri/cfg/autostart.kdl）。
+# 手动验证：pkill -f niri-external-only 后重新运行本脚本即可。
+set -uo pipefail
+
+EXT="HDMI-A-1"                    # 外接屏
+INT="eDP-2"                       # 内置屏
+INT_MODE="2560x1600@165.000"      # 内置屏恢复时的模式和缩放
+INT_SCALE="1.5"
+POLL=1                            # 轮询间隔（秒）
+
+# 输出已启用（有 logical 信息）返回 0；关闭或未连接返回 1
+enabled() {
+    niri msg --json outputs 2>/dev/null \
+        | jq -e --arg o "$1" '.[$o].logical != null' >/dev/null 2>&1
+}
+
+while true; do
+    # niri 还没起来或正在退出：等一下
+    if ! niri msg outputs >/dev/null 2>&1; then
+        sleep "$POLL"
+        continue
+    fi
+
+    if enabled "$EXT"; then
+        # 外接屏在，关掉内置屏
+        if enabled "$INT"; then
+            niri msg output "$INT" off >/dev/null 2>&1 || true
+        fi
+    else
+        # 外接屏不在，内置屏要亮着（niri 的临时 "on" 会用 60Hz 默认模式，
+        # 所以随后显式指定回 165Hz / 1.5 缩放）
+        if ! enabled "$INT"; then
+            niri msg output "$INT" on >/dev/null 2>&1 || true
+            niri msg output "$INT" mode "$INT_MODE" >/dev/null 2>&1 || true
+            niri msg output "$INT" scale "$INT_SCALE" >/dev/null 2>&1 || true
+        fi
+    fi
+
+    sleep "$POLL"
+done

@@ -2,7 +2,9 @@
 // https://github.com/YaLTeR/niri/wiki/Configuration:-Miscellaneous#spawn-sh-at-startup
 
     spawn-sh-at-startup "/usr/lib/polkit-kde-authentication-agent-1 &" // Polkit
+    spawn-sh-at-startup "fcitx5 -d" // 中文输入法
     spawn-sh-at-startup "noctalia"
     spawn-sh-at-startup "clipse"
-    spawn-sh-at-startup "/home/lanrhyme/Projects/slugcatpet/start.sh"
-    spawn-sh-at-startup "/home/lanrhyme/.local/bin/nyanomuse &"
+    spawn-sh-at-startup "/home/sigrika/Projects/slugcatpet/start.sh"
+    spawn-sh-at-startup "/home/sigrika/.local/bin/nyanomuse &"
+    spawn-at-startup "/home/sigrika/.local/bin/niri-external-only" // 外接屏优先：有外接屏时关内置屏，拔线自动恢复

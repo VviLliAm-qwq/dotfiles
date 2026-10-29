@@ -1,2 +1,2 @@
 [hooks]
-wallpaper_changed = [ "bash /home/lanrhyme/.config/noctalia/apply-morandi.sh" ]
+wallpaper_changed = [ "bash /home/sigrika/.config/noctalia/apply-morandi.sh" ]

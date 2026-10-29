@@ -1,13 +1,19 @@
 // ────────────── Output Configuration ──────────────
-// You can run `niri msg outputs` to get the correct name for your displays.
-// You will have to remove "/-" and edit it before it takes effect.
+// 用 `niri msg outputs` 查输出名和可用模式。
 // https://github.com/YaLTeR/niri/wiki/Configuration:-Outputs
+//
+// 注意：一旦为某个输出写了 output 块，未写出的项会回落到默认值
+// （mode 回到显示器 preferred 60Hz、scale 回到 1），所以 scale 要显式写上。
 
-/- output "DP-1" {
-    mode "2560x1440@359.979" // Set resolution and refresh rate
-    scale 1 // No scaling (use 2 for HiDPI)
+// 内置屏：2560x1600 165Hz。外接屏在时由 ~/.local/bin/niri-external-only 自动关闭，
+// 拔掉外接屏时自动恢复成这里的 165Hz / 1.5 缩放。
+output "eDP-2" {
+    mode "2560x1600@165.000"
+    scale 1.5
 }
 
+// 外接屏 SKYDATA G24 GT2：1920x1080 240Hz（连线撑不住就改成 @120.000）
 output "HDMI-A-1" {
+    mode "1920x1080@240.000"
     scale 1
 }

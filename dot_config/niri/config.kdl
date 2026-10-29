@@ -12,11 +12,12 @@ binds {
 }
 
 environment {
-    PATH "/home/lanrhyme/.local/bin:/home/lanrhyme/.npm-global/bin:/usr/local/bin:/usr/bin:/bin"
+    PATH "/home/sigrika/.local/bin:/home/sigrika/.npm-global/bin:/usr/local/bin:/usr/bin:/bin"
     // 保持其他必要的 Wayland 环境变量
     XMODIFIERS "@im=fcitx"
     QT_IM_MODULE "fcitx"
-    GTK_IM_MODULE "fcitx"
+    // GTK_IM_MODULE 交给原生 text-input-v3，避免候选框位置闪烁（niri#4402 同款修复）
+    // GTK_IM_MODULE "fcitx"
     SDL_IM_MODULE "fcitx"
     // 独显改为按需 prime-run 启动，不再全局强制（2026-10-29 修复桌面掉帧）
     // 面板与合成器都在核显上，全局强制独显会让每帧跨 GPU 拷贝并拖垮 144Hz 帧预算

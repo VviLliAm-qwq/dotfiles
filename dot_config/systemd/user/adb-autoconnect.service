@@ -4,7 +4,7 @@ After=network.target tailscaled.service
 
 [Service]
 Type=simple
-ExecStart=/home/lanrhyme/.local/bin/adb-autoconnect.sh
+ExecStart=/home/sigrika/.local/bin/adb-autoconnect.sh
 Restart=always
 RestartSec=10
 

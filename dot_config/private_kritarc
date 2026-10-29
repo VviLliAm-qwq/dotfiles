@@ -69,7 +69,7 @@ LineSmoothingType=1
 LineSmoothingUseDelayDistance=true
 NumberOfLayersForNewImage=2
 OpenGLFilterMode=3
-ResourceDirectory=/home/lanrhyme/.local/share/krita
+ResourceDirectory=/home/sigrika/.local/share/krita
 ResourceItemsRM.viewMode=1
 ShowEraserOutlineWhilePainting=true
 ShowOutlineWhilePainting=true
@@ -345,10 +345,10 @@ active-profile=LanRhyme
 
 [File Dialogs]
 DontUseNativeFileDialog=true
-OpenDocument=/home/lanrhyme/下载
-SaveAs=/home/lanrhyme/下载
-krita_resources=/home/lanrhyme/下载
-选择要导入的资源库=/home/lanrhyme/下载/TOMBOFNULL-STIPPLE BEAST-V2/KRITA
+OpenDocument=/home/sigrika/下载
+SaveAs=/home/sigrika/下载
+krita_resources=/home/sigrika/下载
+选择要导入的资源库=/home/sigrika/下载/TOMBOFNULL-STIPPLE BEAST-V2/KRITA
 
 [GradientChooser]
 global/itemSize=medium
