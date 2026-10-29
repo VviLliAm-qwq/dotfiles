@@ -1,6 +1,6 @@
 [Unit]
 Description=Apply Windows GHelper fan curve (ASUS TUF A16)
-After=systemd-modules-load.service multi-user.target
+After=systemd-modules-load.service
 ConditionPathExists=/sys/class/hwmon
 
 [Service]

@@ -4,6 +4,12 @@
 # 由 asus-fan-curve.service 与 asus-fan-curve-resume.service 以 root 调用
 set -euo pipefail
 
+# 开机早期 hwmon 可能还没注册，最多等 20 秒
+for _ in $(seq 1 40); do
+  grep -qs '^asus_custom_fan_curve$' /sys/class/hwmon/hwmon*/name && break
+  sleep 0.5
+done
+
 P=$(cat /sys/firmware/acpi/platform_profile 2>/dev/null || echo balanced)
 case "$P" in
   quiet)       PROF=silent ;;
