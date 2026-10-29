@@ -13,6 +13,18 @@
   - 验证: `findHostDsh()` 返回 `{packageDir: /home/sigrika/.npm-global/lib/node_modules/@deepseek-ai/dsh, via: "shim"}`; `dsh --version` 与 `dst doctor` 正常; pty 内带或不带 `all_proxy=socks5://127.0.0.1:7897` 启动均无告警, 直接进 TUI
   - 遗留: `dsh-tui` 同名命令未包装 (仍走 npm 链接), 只有 SOCKS 会话下才可能重现代理告警; 旧脚本备份 `~/tmp/dsh-wrapper-backup-20261030-012034.sh`
 
+- **fcitx5 输入法切换键改为 Control+Super+space (2026-10-30, 已完成, 待实键验证)**:
+  - chezmoi 源 `dot_config/private_fcitx5/private_config` 与目标 `~/.config/fcitx5/config` 同步修改, TriggerKeys 与 EnumerateGroupForwardKeys 改为 Control+Super+space, EnumerateGroupBackwardKeys 改为 Shift+Control+Super+space
+  - 机制依据: niri 实现 input-method-v2, 文本框聚焦时 fcitx5 waylandim 持有键盘 grab, 未被 niri 绑定的按键经 input_forward 交给它, 无需在 niri 侧加 bind
+  - 反向约束: 不要把 Mod+Ctrl+Space 写进 niri binds, niri 会先拦截, fcitx5 收不到且长按轮换 enumerate 失效
+  - 生效方式 `fcitx5-remote -r`, 当前状态 2 (active), 已通过 chezmoi apply 且 status 干净
+
+- **niri 高效键位方案草案待落地 (2026-10-30, 进行中)**:
+  - 基于 niri 官方默认配置与社区 dotfiles 起草, 新增 27 项改动 1 项, 文件 `~/tmp/niri-keybinds-proposal.kdl`, 已通过 niri validate
+  - 新增重点: Mod+R 预设列宽, Mod+M 贴边最大化, Mod+Shift+1..9 单窗搬工作区, Mod+Grave 上一窗口, Mod+Page_Up/Down 工作区三件套
+  - 落地步骤: 写入 `~/.config/niri/cfg/keybinds.kdl`, 删除 `config.kdl` 末尾重复的 Mod+Print mark-shot 绑定, chezmoi re-add, 再 `niri msg action load-config-file`
+  - 保留: Mod+Ctrl+Space 归 fcitx5 输入法切换, 勿绑
+
 - **niri 下 fcitx5 候选框整框闪烁根因与修复 (2026-10-30, 已完成, 待 Firefox 重启验证)**:
   - 现象: 打字时候选框整框快速明灭重绘, 换皮肤 (bamboo-dark → mellow-graphite-dark) 与关闭候选框模糊均无效
   - 根因: GTK3 应用被强制走 fcitx5-gtk IM 模块 (`GTK_IM_MODULE=fcitx` 与 `~/.config/gtk-3.0/settings.ini` 的 `gtk-im-module=fcitx`), niri 下该模块每次按键重绘 popup 触发闪烁, 与皮肤无关; 上游 niri#4402 结论一致 (Firefox 与 GTK 应用复现, Chromium/Kate 不复现)
@@ -1151,6 +1163,7 @@
 - **网络（FlClash fake-ip 间歇性 TLS 失败）**：curl/git/gh 可用 `--resolve` 直连真实 IP（github.com=20.205.243.166, api.github.com=20.205.243.168, uploads.github.com=20.205.243.161）+ `http.version=HTTP/1.1`；AUR 遇到网络超时改下载 snapshot tarball 手动 makepkg；TUN 静默掉线时在 FlClash 界面开关一次网卡重启
 - **提权**：pkexec 在 niri 下因 polkit 弹窗缺失卡死，需由用户在交互终端直接执行 sudo；`pkexec pacman -U` 必须使用绝对路径
 - **Git**：`git tag -f` 重打注释 tag 必须带 `-m` 或 `-F` 防 vi 卡死；覆盖发布采用删远程 tag 重新 push 并重建 GitHub Release
+- **dotfiles 自动同步签名失败**：`dotfiles-sync.sh` 在 `commit.gpgsign=true` 且 `user.signingkey=~/.ssh/id_ed25519` 缺失时提交报 "Couldn't load public key ... 无法写提交对象" 并以 128 退出，可用 `git -c commit.gpgsign=false commit` 临时绕过；`origin` push URL 已设为 `no-push://disabled`，同步只落本地 commit 不推送
 - **adb 与多层 shell**：`su -c` 内嵌复杂变量与转义时写成本地脚本 push 后执行；抓取日志前必须 `logcat -c` 清除缓冲区防止历史日志干扰
 - **Hindsight 残留处理**：`uvx daemon start` 异常退出会遗留孤儿进程锁定 `.cache/uv/.lock`，kill 后需手动删除 lock 文件
 - **systemd 用户单元失控重启与沙箱内驱动**：默认 `StartLimitIntervalSec=10s` / `StartLimitBurst=5`，`RestartSec=3` 永远凑不满 5 次/10 秒，限流不会触发，坏单元会通宵重启，必须手动 `disable` 收口；DSH 的 bwrap 沙箱里 `systemctl --user` 连 `/run/user/1000/systemd/private` 会在 AUTHENTICATING 阶段报 ENODATA，改用 `busctl --user call org.freedesktop.systemd1 /org/freedesktop/systemd1 org.freedesktop.systemd1.Manager <方法>`，`StopUnit` 签名 `ss`（单元名 + `replace`）、`DisableUnitFiles` 签名 `asb`、`ResetFailedUnit` 签名 `s`
