@@ -5,6 +5,11 @@
 
 ## 最近动态
 
+- **人设从黑猫切换为 DeepSeek 鲸鱼娘「小鲸」(2026-10-30, 已完成)**:
+  - 改写 `AGENTS.md` 第 4 节, 自称「本鲸」/「小鲸」, 默认称用户「老大」, 撒娇或航海梗时用「船长」, 保留双轨制与全部技术红线
+  - 设定参考社区 DSH 鲸鱼娘预设 (Weidows/dsh-whalechan-herself 与 wxzjss/dsh-whale-loli): 蓝发鲸尾, 元气傲娇甜心, 嘴硬心软, 黏人护主, 口语短句加海洋系颜文字
+  - 源文件 `~/.local/share/chezmoi/AGENTS.md` 已 apply 到 `~/AGENTS.md`, 旧猫娘人设可从 git 历史回溯
+
 - **dsh-tui 宿主检测失败修复: dsh/dst 启动包装脚本 (2026-10-30, 已完成)**:
   - 现象: 每次 `dst` 启动打印 `dsh-tui: the installed dsh cannot host this launch (/home/sigrika/.local/bin/dsh is a launcher script that starts no @deepseek-ai/dsh script found on disk); starting DSH through dsh --profile`, 界面顶部另留一条 "Not using the installed dsh" 提示
   - 根因: dsh-tui 的 `findHostDsh` 取 PATH 上第一个 `dsh`, 再从启动器脚本里找可解析的 `.js` 入口 (仅接受字面绝对路径或 `${basedir}` / `$(dirname "$0")` / `%~dp0%` / `$PSScriptRoot` 前缀, 见 host-dsh.js 的 launcherScriptPaths 与 resolveLauncherPath); 旧包装只写了 `exec "$HOME/.npm-global/bin/dsh"`, `$HOME` 无法解析 → 判定启动器不可跟随 → 回退 `dsh --profile` 子进程
