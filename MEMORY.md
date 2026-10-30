@@ -5,6 +5,33 @@
 
 ## 最近动态
 
+- **fish 启动报 source 失败: 残留的 rustup 与 uv 环境文件 (2026-10-30, 完成)**:
+  - 现象: 每次开 fish 打印 `加载源文件 '/home/sigrika/.cargo/env.fish' 时遇到错误` 与 `'~/.local/bin/env.fish'` 两条 No such file or directory
+  - 来源: `~/.config/fish/conf.d/rustup.fish` 与 `uv.env.fish` 无条件 `source`，两个文件分别由 rustup 安装器与 uv 独立安装器生成
+  - 实际环境: 无 `rust` / `cargo` / `rustup` 包，`~/.cargo` 仅剩 registry 与 git 缓存；uv 为 pacman 版 `0.13.6`（`/usr/bin/uv`），不需要 `~/.local/bin/env.fish`
+  - 修复: 两个 conf.d 文件改为 `if test -f ...` 守卫后再 source，chezmoi 源与目标同步，`fish -lc` 启动无任何 stderr
+  - 提交: `ba99616 fix: fish 加载 cargo 与 uv 环境文件前先检查是否存在`
+  - 附带发现: chezmoi 仓库 `origin` 的 push URL 为 `no-push://disabled`（有意禁推）；`commit.gpgsign=true` + `gpg.format=ssh` 指向 `~/.ssh/id_ed25519`，但 `~/.ssh` 整个不存在，历史提交也无签名，故提交需 `git -c commit.gpgsign=false commit`
+
+- **输入法「消失」根因: fcitx5 profile 被覆盖成纯键盘布局 (2026-10-30, 完成)**:
+  - 现象: 打不出中文，fcitx5 进程在但 `fcitx5-remote -n` 返回 `keyboard-cn`，候选只有键盘布局
+  - 根因: `~/.config/fcitx5/profile` 于 09:11 被写成 `keyboard-us` + `keyboard-cn`，`rime` 被移出 `[Groups/0]`；该文件由 chezmoi 托管，源里仍是 `DefaultIM=rime`
+  - 关键坑: fcitx5 退出时会用**内存中的旧配置**覆盖 profile，所以「热重载 / 先还原再 reload」都会被写回；必须按 `fcitx5-remote -e` 退出 → `chezmoi apply --force ~/.config/fcitx5/profile` 还原 → `fcitx5 -d` 干净启动 的顺序操作
+  - 恢复后: `IM=rime`、`state=2`，profile 与 chezmoi 源一致（`chezmoi status` 干净）
+  - 启动方式: niri `~/.config/niri/cfg/autostart.kdl` 的 `spawn-sh-at-startup "fcitx5 -d"`，niri 不守护进程，进程挂了需手动 `fcitx5 -d` 或重登
+  - 联想方案评估（本次未采用，用户选择保持现状）: `librime-predict.so` 与 `librime-octagram.so` 已随 `librime 1:1.17.0` 安装于 `/usr/lib/rime-plugins/`，但雾凇拼音不带 `predict.db`；`librime-predict` 仅含 336 字节 sample 与 Rust 工具 `tools/make_predict_data`，中文词对数据需自建；万象拼音的联想是自家 Lua 实现（`lua/wanxiang/super_processor.lua`），仓库与 dict-nightly 包内均无 `predict.db`；雾凇官方只提供语法模型配方 rime-ice `others/recipes/grammar.recipe.yaml`（octagram gram.db）
+
+- **Opera 登录页 ERR_CONNECTION_CLOSED 根因: DNS 自环把机场 DoH 引导域名解析成 fake-ip (2026-10-30, 完成)**:
+  - 现象: Opera 打开 `auth.opera.com` 报 ERR_CONNECTION_CLOSED，同时 Clash Verge 订阅更新失败（`tls handshake eof`），境外站点走代理一律 5 秒超时
+  - 排查: 域名解析到 `198.18.0.36` / `fdfe:dcba:9876::24` 即 Clash fake-ip；46 个节点仅 1 个存活；mihomo debug 日志报 `k.c.g.w.m.h.w.9.6.hk02-ae5.entry.v51124-3a.qpon:14561 connect error: no ip address`
+  - 根因: 机场把节点域名 `*.entry.v51124-3a.qpon` 交给私有 DNS `tcp://a0e506…9fe06a.fyi:8080`（真实 IP `47.105.116.11`，手工 TCP 握手与查询均正常），而 Clash Verge 的 DNS 覆写把 `default-nameserver` 首项设为 `system`，mihomo 经 systemd-resolved → 127.0.0.53 → TUN 198.18.0.2 绕回自己，引导域名只拿到 fake-ip，dial 自己导致全部节点 `no ip address`
+  - 修复: 改数据目录 `dns_config.yaml`，`default-nameserver` 去掉 `system`（改为 119.29.29.29 / 223.6.6.6 / 8.8.8.8），`fake-ip-filter` 追加 `+.9fe06a.fyi`；该文件即 `profile_dns_settings.RwoE9BE86Dri.enabled=true` 的覆写源，重启客户端重生成的 `clash-verge.yaml` 已确认保留
+  - 即时生效: `PUT /configs?force=true` 以 `{"payload": <整份 YAML>}` 内联重载（unix socket `/run/clash-verge-service/users/1000/verge-mihomo.sock`），随后 `POST /cache/fakeip/flush`
+  - 结果: 存活节点 1/46 → 38/46（余下均为免费试用与下载专用节点），`auth.opera.com` 307、opera.com / google / github 200，订阅更新恢复成功
+  - 重生成验证: `systemctl --user restart 'app-Clash\x20Verge@autostart.service'` 触发配置重生成，09:06:15 的新 `clash-verge.yaml` 中 `- system` 计数为 0
+  - 备份: `~/tmp/clash-dns-fix-20261030/` 含 `dns_config.yaml.bak`、`clash-verge.yaml.bak`、`mJDvAxjXQ6di.yaml.bak`
+  - 未纳入 chezmoi: `dns_config.yaml` 属 Clash Verge 应用运行数据（GUI 也会写），暂不纳入 dotfiles，重装后需手工复现此改动
+
 - **Opera 用户级安装与 noctalia 自动定位落地 (2026-10-30, 完成)**:
   - Opera 139.0.6053.22 官方 deb 落在 `~/tmp/opera/`，sha512 与 AUR `opera` PKGBUILD 完全一致（`63edfc66...bdcef2`），deb 的 postinst 只做 apt 专用动作（写 /etc/cron.daily、apt keyring、update-alternatives），未执行
   - sudo 需要密码，改为用户级部署：解包 `data.tar.zst` 到 `~/.local/opt/opera/`（371M），启动器 `~/.local/bin/opera`，桌面入口 `~/.local/share/applications/opera.desktop`，图标进 `~/.local/share/icons/hicolor`，`opera --version` 返回 139.0.6053.22
