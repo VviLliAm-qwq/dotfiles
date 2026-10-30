@@ -47,7 +47,9 @@ binds {
     Mod+H                       { focus-column-left; }
     Mod+Right                   { focus-column-right; }
     Mod+L                       { focus-column-right; }
-    Mod+K                       { focus-window-up; }             // 列内切窗口（↑/↓ 已让给工作区）
+    Mod+Up                      { focus-window-up; }
+    Mod+K                       { focus-window-up; }
+    Mod+Down                    { focus-window-down; }
     Mod+J                       { focus-window-down; }
     Mod+Grave                   { focus-window-previous; }       // 最近两个窗口来回切（新增）
 
@@ -107,8 +109,8 @@ binds {
     Mod+Shift+8                 { move-window-to-workspace 8; }
     Mod+Shift+9                 { move-window-to-workspace 9; }
 
-    Mod+Up                      { focus-workspace-up; }          // 上下切换工作区（主键位）
-    Mod+Down                    { focus-workspace-down; }
+    Mod+W                       { focus-workspace-up; }          // 上下切换工作区（主键位）
+    Mod+S                       { focus-workspace-down; }
     Mod+Page_Up                 { focus-workspace-up; }          // 备用键位
     Mod+Page_Down               { focus-workspace-down; }
     Mod+Ctrl+Page_Up            { move-column-to-workspace-up; }
@@ -161,7 +163,7 @@ binds {
     Mod+Q                       { close-window; }
     Mod+T                       { toggle-window-floating; }
     Mod+Shift+V                 { switch-focus-between-floating-and-tiling; }  // 平铺/浮层焦点切换（新增）
-    Mod+W                       { toggle-column-tabbed-display; }
+    Mod+Shift+T                 { toggle-column-tabbed-display; }    // 原 Mod+W，W/S 让给工作区
 
     // ─── 截图 ───
     Mod+Shift+S                 { spawn-sh "noctalia msg screenshot-region"; }  // 区域截图（Win+Shift+S 风格）

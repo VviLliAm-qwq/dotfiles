@@ -5,6 +5,14 @@
 
 ## 最近动态
 
+- **工作区切换改为 Mod+↑/↓ (2026-10-30, 完成)**:
+  - 原因：用户习惯用方向键上下切桌面，`Mod+Up/Down` 原为 `focus-window-up/down`（列内切窗口）
+  - 改动：`dot_config/niri/cfg/keybinds.kdl` 中 `Mod+Up`→`focus-workspace-up`、`Mod+Down`→`focus-workspace-down`；列内切窗口只保留 `Mod+K`/`Mod+J`（功能等价，无损失）
+  - 保留：`Mod+Page_Up/Page_Down` 作为备用键位；`Mod+Ctrl+↑/↓` 仍是 `move-window-up/down`，`Mod+Shift+↑/↓` 仍是显示器切换，未动
+  - 同步：README 键位表已改（工作区表新增方向键行，窗口聚焦表移除 Up/Down），`niri validate` 通过，重复键位检查为空
+  - 提交：`c83b0b9 chore: 自动同步 dotfiles 2026-10-30-09:35:46`
+  - 验证限制：本机无 `wtype`/`ydotool`，无法脚本模拟按键，需用户手按 `Super+↓` 确认
+
 - **「密码变了」实为 pam_faillock 锁定 (2026-10-30, 已定位并修复触发源)**:
   - 现象：`sudo` 输入正确密码仍提示「对不起，请重试」，连续 3 次后彻底进不去
   - 证据：`chage -l sigrika` 显示密码最后修改 10-29，`/etc/shadow` mtime 也是 10-29 23:12，**今日未发生任何密码变更**

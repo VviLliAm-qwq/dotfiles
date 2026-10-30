@@ -45,7 +45,7 @@
 | `Mod+T` | 切换浮动/平铺 |
 | `Mod+F` | 最大化列（再按恢复半屏） |
 | `Mod+Ctrl+F` | 真正全屏（隐藏 panel） |
-| `Mod+W` | 切换标签页显示模式 |
+| `Mod+Shift+T` | 切换标签页显示模式 |
 | `Mod+C` | 居中当前列 |
 | `Mod+Ctrl+C` | 居中所有可见列 |
 
@@ -55,8 +55,8 @@
 |--------|------|
 | `Mod+H` / `Mod+Left` | 聚焦左侧列 |
 | `Mod+L` / `Mod+Right` | 聚焦右侧列 |
-| `Mod+K` | 聚焦上方窗口 |
-| `Mod+J` | 聚焦下方窗口 |
+| `Mod+K` / `Mod+Up` | 聚焦上方窗口 |
+| `Mod+J` / `Mod+Down` | 聚焦下方窗口 |
 | `Mod+Ctrl+H` / `Mod+Ctrl+Left` | 左移列 |
 | `Mod+Ctrl+L` / `Mod+Ctrl+Right` | 右移列 |
 | `Mod+Ctrl+K` / `Mod+Ctrl+Up` | 上移窗口 |
@@ -80,7 +80,7 @@
 | `Mod+1~9` | 切换到工作区 1~9 |
 | `Mod+Ctrl+1~9` | 移动列到工作区 1~9 |
 | `Mod+Tab` | 切换上一个工作区 |
-| `Mod+上/下方向键` | 上下切换工作区 |
+| `Mod+W` / `Mod+S` | 上下切换工作区 |
 | `Mod+PageUp/PageDown` | 上下切换工作区，备用键位 |
 | `Mod+滚轮上/下` | 切换工作区 |
 | `Mod+Ctrl+滚轮上/下` | 移动列到相邻工作区 |
