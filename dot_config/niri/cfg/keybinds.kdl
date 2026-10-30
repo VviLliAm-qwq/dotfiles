@@ -22,7 +22,7 @@ binds {
     Mod+Return                  hotkey-overlay-title="终端 Ghostty" { spawn "ghostty"; }
     Mod+D                       hotkey-overlay-title="启动器 noctalia" { spawn-sh "noctalia msg panel-toggle launcher"; }
     Mod+Ctrl+Return             hotkey-overlay-title="启动器 noctalia" { spawn-sh "noctalia msg panel-toggle launcher"; }
-    Mod+B                       hotkey-overlay-title="浏览器 Firefox" { spawn "firefox"; }
+    Mod+B                       hotkey-overlay-title="浏览器 Opera" { spawn "opera"; }
     Mod+E                       hotkey-overlay-title="文件管理器 Nautilus" { spawn "nautilus"; }
     Mod+A                       hotkey-overlay-title="控制中心" { spawn-sh "noctalia msg panel-toggle control-center"; }
     Mod+Shift+Q                 hotkey-overlay-title="会话菜单" { spawn-sh "noctalia msg panel-toggle sessionMenu"; }

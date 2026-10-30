@@ -5,6 +5,13 @@
 
 ## 最近动态
 
+- **终端背景压暗 + Mod+B 改为启动 Opera (2026-10-30, 完成)**:
+  - Ghostty 背景来自 `~/.config/ghostty/theme`（自动生成），源头是 `morandi-gen.py` 中 `write_ghostty()` 写入的 `palette["term_bg"]`
+  - 改法：`term_bg` 计算由 `max(l_b + 0, 4)` 改为 `max(l_b - 3, 2)`，注释同步为 deeper than base；重新生成后 `background` 从 `#1b1a17` 变 `#12120f`，仍随壁纸联动
+  - niri 键位 `~/.config/niri/cfg/keybinds.kdl` 第 25 行：`Mod+B` 由 `spawn "firefox"` 改为 `spawn "opera"`，overlay 标题改「浏览器 Opera」；Opera 走用户级启动器 `~/.local/bin/opera` → `~/.local/opt/opera/opera`，niri 的 PATH 已含 `~/.local/bin`
+  - 生效链路：`apply-morandi.sh` 全量重生成 → `niri validate` 通过 → `niri msg action load-config-file` 热重载成功；Ghostty 侧需 `Ctrl+Shift+,` 或重开窗口才吃到新 theme
+  - 注意：`Mod+B` 的旧语义（浏览器）已换成 Opera，Firefox 仍可从 `Mod+D` 启动器搜到
+
 - **Git 策略切换: 只做本地提交, 不再推送 GitHub (2026-10-30, 完成)**:
   - 用户要求：此后不再向 GitHub 提交，只做本地 git
   - `dotfiles-sync.sh` 删除末尾 `git push origin master`，commit 改为 `git -c commit.gpgsign=false commit`（否则因 `commit.gpgsign=true` 而 `~/.ssh/id_ed25519` 不存在导致提交直接失败）
