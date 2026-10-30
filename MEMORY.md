@@ -5,6 +5,13 @@
 
 ## 最近动态
 
+- **Ghostty 终端半透明 + 背景模糊 (2026-10-30, 完成)**:
+  - `dot_config/ghostty/config` 新增 `background-opacity = 0.82` 与 `background-blur = 20`
+  - 关键结论：niri 26.04 **没有** `blur` 窗口规则，写 `blur true` 会报 `unexpected node`；模糊是客户端协议实现——niri 内置 `ext_background_effect_manager_v1` 与 `org_kde_kwin_blur_manager`（二进制含 `src/render_helpers/blur.rs`），由 Ghostty 发请求、niri 负责渲染
+  - 校验：`ghostty +show-config` 解析出 0.82 / 20；`niri validate` 通过；grim 截图确认终端已透出壁纸墨绿渐变
+  - 调参：`background-opacity` 越低越透（0.7 左右更明显），`background-blur` 越大越糊（20 起步，过高会掉帧）
+  - 复现步骤：改 `dot_config/ghostty/config` → `chezmoi apply` → `pkill -USR2 -x ghostty` 热重载
+
 - **Bug 修复: 主题生成器覆盖 fcitx5 用户设置 (2026-10-30, 完成)**:
   - 现象：换壁纸或手动跑 `apply-morandi.sh` 之后，fcitx5 手工选的主题与候选框方向会变回 `bamboo-dark` + 纵向
   - 根因一：`morandi-gen.py` 的 `write_fcitx5()` 用 `re.sub` 强制写 `Theme=bamboo-dark`、`DarkTheme=bamboo-dark`、`UseDarkTheme=False`、`Vertical Candidate List=True`
