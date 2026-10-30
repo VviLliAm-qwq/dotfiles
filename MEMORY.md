@@ -14,13 +14,13 @@
   - 坑：`sudo -A` 弹窗超时未输入会被记为一次失败（09:36:11 记了一条），faillock 满 3 次锁 10 分钟，自动化里不可反复尝试
   - 调整时长：改该文件的 `timestamp_timeout` 数值即可，改完 `sudo -k` 清缓存再验证
 
-- **工作区切换改为 Mod+↑/↓ (2026-10-30, 完成)**:
-  - 原因：用户习惯用方向键上下切桌面，`Mod+Up/Down` 原为 `focus-window-up/down`（列内切窗口）
-  - 改动：`dot_config/niri/cfg/keybinds.kdl` 中 `Mod+Up`→`focus-workspace-up`、`Mod+Down`→`focus-workspace-down`；列内切窗口只保留 `Mod+K`/`Mod+J`（功能等价，无损失）
-  - 保留：`Mod+Page_Up/Page_Down` 作为备用键位；`Mod+Ctrl+↑/↓` 仍是 `move-window-up/down`，`Mod+Shift+↑/↓` 仍是显示器切换，未动
-  - 同步：README 键位表已改（工作区表新增方向键行，窗口聚焦表移除 Up/Down），`niri validate` 通过，重复键位检查为空
-  - 提交：`c83b0b9 chore: 自动同步 dotfiles 2026-10-30-09:35:46`
-  - 验证限制：本机无 `wtype`/`ydotool`，无法脚本模拟按键，需用户手按 `Super+↓` 确认
+- **工作区切换最终定为 Mod+W/Mod+S (2026-10-30, 完成)**:
+  - 过程：先试过 `Mod+↑/↓`，用户改主意，最终采用 WASD 风格 `Mod+W` 上 / `Mod+S` 下
+  - 改动：`Mod+Up/Down` 恢复原义 `focus-window-up/down`（列内切窗口）；`Mod+W`→`focus-workspace-up`、`Mod+S`→`focus-workspace-down`
+  - 连带：`toggle-column-tabbed-display` 从 `Mod+W` 挪到 `Mod+Shift+T`，原键位让给工作区
+  - 保留：`Mod+Page_Up/Page_Down` 仍为工作区备用键位，`Mod+Ctrl+↑/↓` 挪窗口、`Mod+Shift+↑/↓` 切显示器未动
+  - 同步：README 键位表三处更新（标签页、窗口聚焦、工作区），`niri validate` 通过，重复键位检查为空
+  - 验证限制：本机无 `wtype`/`ydotool`，无法脚本模拟按键，需用户手按 `Mod+W`/`Mod+S` 确认
 
 - **「密码变了」实为 pam_faillock 锁定 (2026-10-30, 已定位并修复触发源)**:
   - 现象：`sudo` 输入正确密码仍提示「对不起，请重试」，连续 3 次后彻底进不去
