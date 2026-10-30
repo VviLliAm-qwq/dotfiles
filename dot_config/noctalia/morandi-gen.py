@@ -582,13 +582,7 @@ BorderWidth=0
     classicui = Path.home() / ".config/fcitx5/conf/classicui.conf"
     if classicui.exists():
         content = classicui.read_text()
-        content = re.sub(r"^Theme=.*", "Theme=bamboo-dark", content, flags=re.MULTILINE)
-        content = re.sub(r"^DarkTheme=.*", "DarkTheme=bamboo-dark", content, flags=re.MULTILINE)
-        content = re.sub(r"^UseDarkTheme=.*", "UseDarkTheme=False", content, flags=re.MULTILINE)
-        if "Vertical Candidate List=" in content:
-            content = re.sub(r"^Vertical Candidate List=.*", "Vertical Candidate List=True", content, flags=re.MULTILINE)
-        else:
-            content += "\nVertical Candidate List=True\n"
+        # 仅同步托盘配色；主题名、深浅模式与候选列表方向属于用户偏好，生成器不得覆盖
         content = re.sub(r"^TrayOutlineColor=.*", f"TrayOutlineColor={tray_outline}", content, flags=re.MULTILINE)
         content = re.sub(r"^TrayTextColor=.*", f"TrayTextColor={tray_text}", content, flags=re.MULTILINE)
         classicui.write_text(content)
@@ -1377,14 +1371,14 @@ def apply_system_changes(wallpaper_path=None):
         efi_dir = "/boot/efi"
         subprocess.run(["sudo", "magick", wallpaper_path, "-blur", "0x12", "-resize", "1920x1080!", "-quality", "95", f"{efi_dir}/limine_bg.png"], stderr=subprocess.DEVNULL)
         
-    try:
-        pid = subprocess.check_output(["pgrep", "-x", "fcitx5"]).decode().strip()
-        if pid:
-            subprocess.run(["kill", pid])
-            subprocess.run(["sleep", "0.3"])
-    except subprocess.CalledProcessError:
-        pass
-    subprocess.Popen(["fcitx5"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
+    if subprocess.run(["pgrep", "-x", "fcitx5"], capture_output=True).returncode == 0:
+        # 优雅重载：只让 fcitx5 重读配置与主题，避免 kill 触发它把内存态写回磁盘覆盖用户设置
+        subprocess.run(["fcitx5-remote", "-r"], stderr=subprocess.DEVNULL)
+        subprocess.run(["busctl", "--user", "call", "org.fcitx.Fcitx5", "/controller",
+                        "org.fcitx.Fcitx.Controller1", "ReloadAddonConfig", "s", "classicui"],
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    else:
+        subprocess.Popen(["fcitx5"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
 
 def write_flclash(palette):
     config_path = Path.home() / ".local/share/com.follow.clash/shared_preferences.json"

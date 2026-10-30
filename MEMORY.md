@@ -5,6 +5,15 @@
 
 ## 最近动态
 
+- **Bug 修复: 主题生成器覆盖 fcitx5 用户设置 (2026-10-30, 完成)**:
+  - 现象：换壁纸或手动跑 `apply-morandi.sh` 之后，fcitx5 手工选的主题与候选框方向会变回 `bamboo-dark` + 纵向
+  - 根因一：`morandi-gen.py` 的 `write_fcitx5()` 用 `re.sub` 强制写 `Theme=bamboo-dark`、`DarkTheme=bamboo-dark`、`UseDarkTheme=False`、`Vertical Candidate List=True`
+  - 根因二：`apply_system_changes()` 结尾 `kill` fcitx5 再重新拉起，fcitx5 退出时会把内存态写回 `classicui.conf`
+  - 修复：`write_fcitx5()` 只保留 `TrayOutlineColor` / `TrayTextColor` 同步，主题名、深浅模式、候选方向完全不碰；fcitx5 改为 `fcitx5-remote -r` + `busctl ReloadAddonConfig classicui` 优雅重载，不再 kill
+  - 回归：跑 `apply-morandi.sh` 后 fcitx5 PID 不变，`Vertical Candidate List=False` 与 `Theme=bamboo-dark` 均保持
+  - 用户偏好基线（01:30 提交）：`Theme=bamboo-dark` / `DarkTheme=bamboo-dark` / `# UseDarkTheme=False` / `Vertical Candidate List=False`（横向）
+  - 待办：卸载 Firefox 需 sudo 密码，`pkexec pacman -Rns firefox` 返回 `Error executing command as another user: Not authorized`（DSH 会话不在 seat 内），已留给用户执行
+
 - **终端背景压暗 + Mod+B 改为启动 Opera (2026-10-30, 完成)**:
   - Ghostty 背景来自 `~/.config/ghostty/theme`（自动生成），源头是 `morandi-gen.py` 中 `write_ghostty()` 写入的 `palette["term_bg"]`
   - 改法：`term_bg` 计算由 `max(l_b + 0, 4)` 改为 `max(l_b - 3, 2)`，注释同步为 deeper than base；重新生成后 `background` 从 `#1b1a17` 变 `#12120f`，仍随壁纸联动
