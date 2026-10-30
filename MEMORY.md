@@ -5,6 +5,14 @@
 
 ## 最近动态
 
+- **niri 聚焦窗口亮框改为 2px 玫瑰调渐变 (2026-10-30, 完成)**:
+  - 现象: 聚焦窗只剩 1px `iris→pine` 渐变（#777977→#6a6b6a，L47/S1），壁纸边缘是 #39x 级深灰，肉眼几乎分辨不出
+  - 改法: `morandi-gen.py` 的 `write_niri()` 里新建 `ring_from = morandi(blend(iris, love, 0.08), 0.0, 21, 0, 34)` 与 `ring_to = morandi(blend(ring_from, text, 0.35), 0.0, 4, 0, 34)`，输出 `width 2` 的 `active-gradient ... angle=135`，当前值 #afaaaa→#cfcdcd
+  - 坑一: niri 26.04 的 `border` 与 `focus-ring` 同时开启时 border 被窗口内容盖住（默认配置注释亦说明），实测 6px 绿框不可见，故 `border off`
+  - 坑二: 圆角 + `clip-to-geometry true` 下，窗口四角的直角部分会被裁掉，靠角的细线在角上近乎消失，辨认主要靠边中段，故宽度不要低于 2px
+  - 调参: `ring_from` 的 light_adjust（当前 21）与 sat_cap（当前 34）决定醒目程度，想更冷就把 `blend(..., love, 0.08)` 的玫瑰色混比调低
+  - 生效: 生成器已提交 `a542f9f`，`niri validate` 通过并 `load-config-file` 热重载；`~/.config/niri/cfg/colors.kdl` 由 chezmoi 未托管（生成物）
+
 - **DSH 新增 OpenDesign 套餐路由 (2026-10-30, 完成)**:
   - 路由 `opendesign` 写入 `~/.dsh/profiles/dsh-tui/cordis.patch.yml`: `llm-pi-ai.providers.opendesign` 用 `api: openai-completions` + `baseURL: https://amr-link.open-design.ai/v1`, `apiKeyEnv: OPENDESIGN_API_KEY`
   - 密钥存 `~/.dsh/.credentials.yaml` 的 `refs.OPENDESIGN_API_KEY` (0600), 与 Web `/provider` 写库约定一致

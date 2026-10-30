@@ -1,5 +1,6 @@
 # Ghostty Configuration — Enhanced Aesthetics & Custom Shader
 font-family = JetBrainsMono Nerd Font
+font-family = Source Han Sans CN
 font-size = 12
 font-feature = calt
 font-feature = liga

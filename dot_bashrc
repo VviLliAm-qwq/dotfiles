@@ -9,13 +9,13 @@ alias ls='ls --color=auto'
 alias grep='grep --color=auto'
 PS1='[\u@\h \W]\$ '
 
-. "$HOME/.local/bin/env"
+[ -f "$HOME/.local/bin/env" ] && . "$HOME/.local/bin/env"
 export PATH="$HOME/.npm-global/bin:$PATH"
 
 
 # Added by Antigravity CLI installer
 export PATH="/home/sigrika/.local/bin:$PATH"
-. "$HOME/.cargo/env"
+[ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
 
 # >>> lean-ctx agent aliases >>>
 alias claude='LEAN_CTX_AGENT=1 BASH_ENV="$HOME/.bashenv" claude'
@@ -46,3 +46,9 @@ proxy_off() {
 if timeout 0.1 bash -c 'true >/dev/tcp/127.0.0.1/7897' 2>/dev/null; then
     proxy_on >/dev/null 2>&1
 fi
+
+# --- Android SDK / JDK 21 ---
+export ANDROID_HOME="$HOME/Android/Sdk"
+export ANDROID_SDK_ROOT="$ANDROID_HOME"
+export JAVA_HOME="/usr/lib/jvm/java-21-openjdk"
+export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$PATH"

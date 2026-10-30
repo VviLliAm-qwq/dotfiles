@@ -11,7 +11,7 @@ source /home/sigrika/.cachyos-zsh-config.zsh
 # [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 fastfetch
 
-. "$HOME/.local/bin/env"
+[ -f "$HOME/.local/bin/env" ] && . "$HOME/.local/bin/env"
 
 # Wayland environment configuration for Fcitx5
 export XMODIFIERS=@im=fcitx

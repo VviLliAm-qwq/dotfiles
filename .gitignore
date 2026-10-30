@@ -7,3 +7,5 @@ dot_config/opencode/executable_opencode.json
 .env
 dot_config/.env
 dot_config/opencode/executable_opencode.json
+**/__pycache__/
+dot_config/noctalia/__pycache__/
