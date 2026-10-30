@@ -5,6 +5,13 @@
 
 ## 最近动态
 
+- **DSH 新增 OpenDesign 套餐路由 (2026-10-30, 完成)**:
+  - 路由 `opendesign` 写入 `~/.dsh/profiles/dsh-tui/cordis.patch.yml`: `llm-pi-ai.providers.opendesign` 用 `api: openai-completions` + `baseURL: https://amr-link.open-design.ai/v1`, `apiKeyEnv: OPENDESIGN_API_KEY`
+  - 密钥存 `~/.dsh/.credentials.yaml` 的 `refs.OPENDESIGN_API_KEY` (0600), 与 Web `/provider` 写库约定一致
+  - 13 个模型 (claude-haiku-5.5 / deepseek-v4-flash / deepseek-v4-flash-vision-exp / deepseek-v4-pro / deepseek-v4.1-flash / glm-5.3-flash / glm-5.3-flashx / gpt-6-luna / hy4-preview / kimi-k2.7-code / mimo-v2.6-flash / mimo-v2.6-pro / minimax-m3.1-flash), contextWindow/maxTokens 取自网关 `/models` 的 `context_limit` / `output_budget`, 支持图片的模型加 `input: [text, image]`
+  - 验证: `dsh --profile dsh-tui --dump-config` 合成正常; `dsh --profile headless --patch` 端到端回复「正常」exit 0; TUI 内 `/model` 选 `opendesign` 下模型, 没出现就重启 `dst`
+  - 维护: 套餐模型变动时改 `cordis.patch.yml` 里的 `models` 列表, 换 key 改 `refs.OPENDESIGN_API_KEY`, 凭据文件不纳入 chezmoi
+
 - **Nautilus 右键终端：改用扩展实现一级菜单 (2026-10-30, 完成)**:
   - 背景右键**不显示「脚本」子菜单**：Nautilus 51 菜单 XML 里 `_Scripts` 限定 `show-in-mode=browse` 且挂在选中项菜单，因此脚本方案在文件夹空白处右键看不到
   - AUR 包 `nautilus-open-any-terminal` 依赖 `python-nautilus`（该名字在仓库/AUR 均不存在）装不上，改为手工：装 `nautilus-python 4.2.0`（pacman，snapper 33/34），上游 `nautilus-open-any-terminal 0.8.2` 源码 `make build` + `make install-nautilus`（非 root 时自动装到 `~/.local/share/nautilus-python/extensions` 与 `~/.local/share/glib-2.0/schemas`），再 `make schema` 编译
