@@ -5,6 +5,15 @@
 
 ## 最近动态
 
+- **「密码变了」实为 pam_faillock 锁定 (2026-10-30, 已定位并修复触发源)**:
+  - 现象：`sudo` 输入正确密码仍提示「对不起，请重试」，连续 3 次后彻底进不去
+  - 证据：`chage -l sigrika` 显示密码最后修改 10-29，`/etc/shadow` mtime 也是 10-29 23:12，**今日未发生任何密码变更**
+  - 真因：`pam_faillock`（`/etc/pam.d/system-auth` 默认 deny=3 / unlock_time=600）记录 09:23:20-22 三条 sudo 失败（`faillock --user sigrika` 可查），锁定期间输入正确密码同样判失败
+  - 触发源：`morandi-gen.py` 的 `sudo magick` 更新 EFI 背景时无 TTY，密码对话失败且 stderr 被丢进 DEVNULL，静默累计失败次数
+  - 解锁：约 09:33:22 自动解除；`/run/faillock` 为 tmpfs，重启立即清零；root 可用 `faillock --user <user> --reset`
+  - 修复：EFI 背景更新改为先 `sudo -n true` 探测，命中才用 `sudo -n magick`，无缓存凭据时静默跳过
+  - 经验：`sudo -n` 的失败**不计入** faillock（journal 只留 `a password is required`），只有真正走 PAM 密码对话的失败才计数；在无 TTY 的自动化脚本里绝不要调用裸 `sudo`
+
 - **Ghostty 终端半透明 + 背景模糊 (2026-10-30, 完成)**:
   - `dot_config/ghostty/config` 新增 `background-opacity = 0.82` 与 `background-blur = 20`
   - 关键结论：niri 26.04 **没有** `blur` 窗口规则，写 `blur true` 会报 `unexpected node`；模糊是客户端协议实现——niri 内置 `ext_background_effect_manager_v1` 与 `org_kde_kwin_blur_manager`（二进制含 `src/render_helpers/blur.rs`），由 Ghostty 发请求、niri 负责渲染

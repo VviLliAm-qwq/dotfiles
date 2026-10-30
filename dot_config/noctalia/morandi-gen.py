@@ -1369,7 +1369,9 @@ def apply_system_changes(wallpaper_path=None):
     
     if wallpaper_path and Path(wallpaper_path).exists():
         efi_dir = "/boot/efi"
-        subprocess.run(["sudo", "magick", wallpaper_path, "-blur", "0x12", "-resize", "1920x1080!", "-quality", "95", f"{efi_dir}/limine_bg.png"], stderr=subprocess.DEVNULL)
+        # 无 TTY 时绝不能触发 sudo 密码交互，否则 pam_faillock 会累计失败并锁账户（3 次锁 10 分钟）
+        if subprocess.run(["sudo", "-n", "true"], stderr=subprocess.DEVNULL).returncode == 0:
+            subprocess.run(["sudo", "-n", "magick", wallpaper_path, "-blur", "0x12", "-resize", "1920x1080!", "-quality", "95", f"{efi_dir}/limine_bg.png"], stderr=subprocess.DEVNULL)
         
     if subprocess.run(["pgrep", "-x", "fcitx5"], capture_output=True).returncode == 0:
         # 优雅重载：只让 fcitx5 重读配置与主题，避免 kill 触发它把内存态写回磁盘覆盖用户设置
