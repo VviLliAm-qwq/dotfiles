@@ -25,6 +25,12 @@ fi
 
 if ! git diff --cached --quiet 2>/dev/null || ! git diff --quiet 2>/dev/null || [ -n "$(git ls-files --others --exclude-standard)" ]; then
     git add -A
-    # 只做本地提交：不推送任何远端；~/.ssh 无签名密钥，跳过签名以免提交失败
+    # ~/.ssh 无签名密钥，跳过签名以免提交失败
     git -c commit.gpgsign=false commit -m "chore: 自动同步 dotfiles $(date +%F-%T)" >>"$LOG" 2>&1
+fi
+
+# 推送到自己的 fork：origin = VviLliAm-qwq/dotfiles，上游 LanRhyme/dotfiles 放在 upstream 远端
+if ! git push origin HEAD:master >>"$LOG" 2>&1; then
+    echo "推送失败：本地提交已保留，请检查网络或 gh 凭据（gh auth status）" >&2
+    exit 1
 fi

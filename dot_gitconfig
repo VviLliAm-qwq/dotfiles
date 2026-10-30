@@ -1,15 +1,15 @@
 [user]
-	name = LanRhyme
-	email = xiao_ren233@foxmail.com
-	signingkey = ~/.ssh/id_ed25519
+	name = VviLliAm-qwq
+	email = 173694523+VviLliAm-qwq@users.noreply.github.com
+	# signingkey = ~/.ssh/id_ed25519  # 本机还没有 SSH key，生成后再启用
 [gpg]
 	format = ssh
-[gpg "ssh"]
-	allowedSignersFile = ~/.ssh/allowed_signers
+#[gpg "ssh"]
+#	allowedSignersFile = ~/.ssh/allowed_signers
 [commit]
-	gpgsign = true
+	gpgsign = false
 [tag]
-	gpgsign = true
+	gpgsign = false
 [core]
 	autocrlf = input
 [safe]

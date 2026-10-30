@@ -26,3 +26,5 @@ dot_config/REAPER/reaper-mouse.ini
 dot_config/REAPER/reaper-vstplugins64.ini
 dot_config/REAPER/reaper-jsfx.ini
 dot_config/REAPER/reaper-reginfo2.ini
+# gh 凭据含 OAuth token，不纳入同步（chezmoi 按目标路径匹配，需写 .config/...）
+.config/gh/hosts.yml
