@@ -5,6 +5,15 @@
 
 ## 最近动态
 
+- **sudo 免重复输密码：30 分钟时间戳缓存 (2026-10-30, 已落地)**:
+  - `/etc/sudoers.d/99-sudo-timestamp`（0440 root:root）：`Defaults timestamp_timeout=30` + `Defaults timestamp_type=global`，即输一次密码后 30 分钟内跨终端免输
+  - 安装方式：`SUDO_ASKPASS=~/tmp/sudo-askpass.sh sudo -A install -m 0440 ...`，zenity 图形密码框一次性授权，09:34:22 执行成功（journal 有 `session opened for user root`）
+  - 该次成功同时证明**用户密码正确**，此前的失败是 faillock 锁定而非密码变更
+  - sudo 1.9.17p2 已解析通过（安装后 `sudo -n` 报的是「需要密码」而非语法错误，说明配置合法）
+  - 剩余一步：装好后第一次仍要 `sudo -v` 重新种时间戳，之后才开始 30 分钟免密
+  - 坑：`sudo -A` 弹窗超时未输入会被记为一次失败（09:36:11 记了一条），faillock 满 3 次锁 10 分钟，自动化里不可反复尝试
+  - 调整时长：改该文件的 `timestamp_timeout` 数值即可，改完 `sudo -k` 清缓存再验证
+
 - **工作区切换改为 Mod+↑/↓ (2026-10-30, 完成)**:
   - 原因：用户习惯用方向键上下切桌面，`Mod+Up/Down` 原为 `focus-window-up/down`（列内切窗口）
   - 改动：`dot_config/niri/cfg/keybinds.kdl` 中 `Mod+Up`→`focus-workspace-up`、`Mod+Down`→`focus-workspace-down`；列内切窗口只保留 `Mod+K`/`Mod+J`（功能等价，无损失）
