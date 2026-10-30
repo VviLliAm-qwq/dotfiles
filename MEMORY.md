@@ -11,6 +11,13 @@
   - 13 个模型 (claude-haiku-5.5 / deepseek-v4-flash / deepseek-v4-flash-vision-exp / deepseek-v4-pro / deepseek-v4.1-flash / glm-5.3-flash / glm-5.3-flashx / gpt-6-luna / hy4-preview / kimi-k2.7-code / mimo-v2.6-flash / mimo-v2.6-pro / minimax-m3.1-flash), contextWindow/maxTokens 取自网关 `/models` 的 `context_limit` / `output_budget`, 支持图片的模型加 `input: [text, image]`
   - 验证: `dsh --profile dsh-tui --dump-config` 合成正常; `dsh --profile headless --patch` 端到端回复「正常」exit 0; TUI 内 `/model` 选 `opendesign` 下模型, 没出现就重启 `dst`
   - 维护: 套餐模型变动时改 `cordis.patch.yml` 里的 `models` 列表, 换 key 改 `refs.OPENDESIGN_API_KEY`, 凭据文件不纳入 chezmoi
+  - **deepseek-v4.1-flash 推理档位与视觉 (2026-10-30 追加)**: 按用户要求只开四档 `reasoningEfforts: {off: none, low: low, high: high, max: max}`, 同时 `input: [text, image]`
+    - 网关 `reasoning_effort` 实际接受 `none/minimal/low/medium/high/xhigh/ultra/max` (非法值报错里自带清单)
+    - 坑: 不传 `reasoning_effort` 时网关默认仍思考, 所以 `off` 必须显式映射 `none`, 留空 (`off:` 无值) 关不掉思考
+    - pi-ai 的 `thinkingFormat: deepseek` 档位会额外发 `thinking:{type:enabled/disabled}`, 实测网关忽略该字段, 不影响
+    - 路由加 `compat.maxTokensField: max_tokens`, 上限走 `max_tokens`
+    - 视觉实测: 纯红 PNG 提问答「红色」; headless 用 `max` 档出现 thinking 事件, `off` 档无 thinking 且输出仅 1 token, 均 exit 0
+    - 切换: TUI 内 `/effort` 或 `/settings` 选 关闭/低/高/最大
 
 - **Nautilus 右键终端：改用扩展实现一级菜单 (2026-10-30, 完成)**:
   - 背景右键**不显示「脚本」子菜单**：Nautilus 51 菜单 XML 里 `_Scripts` 限定 `show-in-mode=browse` 且挂在选中项菜单，因此脚本方案在文件夹空白处右键看不到
