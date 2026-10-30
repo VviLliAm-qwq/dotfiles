@@ -5,6 +5,13 @@
 
 ## 最近动态
 
+- **Git 策略切换: 只做本地提交, 不再推送 GitHub (2026-10-30, 完成)**:
+  - 用户要求：此后不再向 GitHub 提交，只做本地 git
+  - `dotfiles-sync.sh` 删除末尾 `git push origin master`，commit 改为 `git -c commit.gpgsign=false commit`（否则因 `commit.gpgsign=true` 而 `~/.ssh/id_ed25519` 不存在导致提交直接失败）
+  - 仓库 `origin` 的 pushurl 保持 `no-push://disabled`（fetch 仍走 GitHub 部分克隆，仅禁止推送）；无 `~/.config/chezmoi/chezmoi.toml`，因此不存在 autoCommit / autoPush
+  - `AGENTS.md` 第 3 节与第 8 节各加一条本地-only 规则，禁止新增 `git push` 与任何自动推送机制
+  - 影响面核对：全机脚本中仅 `dotfiles-sync.sh` 含 `git push`，已清除
+
 - **fish 启动报 source 失败: 残留的 rustup 与 uv 环境文件 (2026-10-30, 完成)**:
   - 现象: 每次开 fish 打印 `加载源文件 '/home/sigrika/.cargo/env.fish' 时遇到错误` 与 `'~/.local/bin/env.fish'` 两条 No such file or directory
   - 来源: `~/.config/fish/conf.d/rustup.fish` 与 `uv.env.fish` 无条件 `source`，两个文件分别由 rustup 安装器与 uv 独立安装器生成

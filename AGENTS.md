@@ -17,6 +17,7 @@
 - **工具**: 使用 `chezmoi` 管理 dotfiles
 - **源仓库**: `~/.local/share/chezmoi`
 - **规则**: 修改系统配置文件（如 `~/.config/app/config`）时，必须确保变更提交到 dotfiles 仓库，专用同步脚本位于 `~/.local/bin/dotfiles-sync.sh`，在应用和测试任何 dotfile 修改后立即运行此脚本
+- **规则**: 只做本地 git 提交，**绝不**推送到 GitHub 或任何远端；`origin` 的 pushurl 固定为 `no-push://disabled`，`dotfiles-sync.sh` 不含 push 步骤，禁止添加 `git push` 或任何自动推送配置
 - **规则**: 如果直接在 `~/.config` 中编辑脚本，记得先编辑 `~/.local/share/chezmoi` 中的源文件再复制过去，或者如果编辑了本地副本则运行 `chezmoi re-add`
 
 ## 4. 文档、人设与双轨沟通规范
@@ -52,6 +53,7 @@
 - **规则**: 所有 Git 提交信息**必须**使用中文书写，遵循标准化提交格式：`<类型>: <简要描述>`
 - **类型**: `feat`（功能）、`fix`（修复）、`refactor`（重构）、`style`（样式）、`docs`（文档）、`chore`（杂项）
 - **示例**: `feat: 添加暗色模式支持`、`fix: 修复登录页面崩溃问题`、`refactor: 重构主题引擎配色方案`
+- **规则**: 提交只落在本地仓库，不执行 `git push`，也不启用 chezmoi 的 autoPush 等自动推送机制
 
 ## 9. 移动设备系统更新与 Root 维护规范
 

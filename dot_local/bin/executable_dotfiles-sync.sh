@@ -8,7 +8,7 @@ cd "$SOURCE_DIR"
 
 chezmoi re-add 2>>"$LOG"
 
-# 密钥检查：提交前拦截疑似密钥，避免推送到 GitHub
+# 密钥检查：提交前拦截疑似密钥，避免明文进入仓库
 # 仅匹配密钥特征，不匹配 css 属性名(sk-border)、键盘布局(keyboard-sk-qwerty)等正常内容
 # 如确认安全可用 DOTFILES_SYNC_ALLOW_KEYS=1 强制放行
 if [ -z "${DOTFILES_SYNC_ALLOW_KEYS:-}" ]; then
@@ -25,6 +25,6 @@ fi
 
 if ! git diff --cached --quiet 2>/dev/null || ! git diff --quiet 2>/dev/null || [ -n "$(git ls-files --others --exclude-standard)" ]; then
     git add -A
-    git commit -m "chore: 自动同步 dotfiles $(date +%F-%T)" >>"$LOG" 2>&1
-    git push origin master >>"$LOG" 2>&1
+    # 只做本地提交：不推送任何远端；~/.ssh 无签名密钥，跳过签名以免提交失败
+    git -c commit.gpgsign=false commit -m "chore: 自动同步 dotfiles $(date +%F-%T)" >>"$LOG" 2>&1
 fi
