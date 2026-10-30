@@ -47,9 +47,7 @@ binds {
     Mod+H                       { focus-column-left; }
     Mod+Right                   { focus-column-right; }
     Mod+L                       { focus-column-right; }
-    Mod+Up                      { focus-window-up; }
-    Mod+K                       { focus-window-up; }
-    Mod+Down                    { focus-window-down; }
+    Mod+K                       { focus-window-up; }             // 列内切窗口（↑/↓ 已让给工作区）
     Mod+J                       { focus-window-down; }
     Mod+Grave                   { focus-window-previous; }       // 最近两个窗口来回切（新增）
 
@@ -109,7 +107,9 @@ binds {
     Mod+Shift+8                 { move-window-to-workspace 8; }
     Mod+Shift+9                 { move-window-to-workspace 9; }
 
-    Mod+Page_Up                 { focus-workspace-up; }          // 键盘上下切工作区（新增）
+    Mod+Up                      { focus-workspace-up; }          // 上下切换工作区（主键位）
+    Mod+Down                    { focus-workspace-down; }
+    Mod+Page_Up                 { focus-workspace-up; }          // 备用键位
     Mod+Page_Down               { focus-workspace-down; }
     Mod+Ctrl+Page_Up            { move-column-to-workspace-up; }
     Mod+Ctrl+Page_Down          { move-column-to-workspace-down; }
