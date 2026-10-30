@@ -5,6 +5,14 @@
 
 ## 最近动态
 
+- **Nautilus 右键终端：改用扩展实现一级菜单 (2026-10-30, 完成)**:
+  - 背景右键**不显示「脚本」子菜单**：Nautilus 51 菜单 XML 里 `_Scripts` 限定 `show-in-mode=browse` 且挂在选中项菜单，因此脚本方案在文件夹空白处右键看不到
+  - AUR 包 `nautilus-open-any-terminal` 依赖 `python-nautilus`（该名字在仓库/AUR 均不存在）装不上，改为手工：装 `nautilus-python 4.2.0`（pacman，snapper 33/34），上游 `nautilus-open-any-terminal 0.8.2` 源码 `make build` + `make install-nautilus`（非 root 时自动装到 `~/.local/share/nautilus-python/extensions` 与 `~/.local/share/glib-2.0/schemas`），再 `make schema` 编译
+  - 终端指向：`gsettings set com.github.stunkymonkey.nautilus-open-any-terminal terminal ghostty`；ghostty 用 `--working-directory`（`workdir_value_inline=True`）
+  - 菜单文案：「在此处打开本地Ghostty」（zh_CN 翻译 `Open Local {} Here`）
+  - 验证：扩展目录出现 `__pycache__` 说明模块被导入，nautilus 进程已加载 `libpython3.14.so.1.0`
+  - 兜底保留：`~/.local/share/nautilus/scripts/Open Terminal Here` 脚本仍在，若嫌菜单重复可删
+
 - **Nautilus 右键「在此打开终端」(2026-10-30, 完成)**:
   - 默认文件管理器为 Nautilus 51.1（`xdg-mime` → org.gnome.Nautilus），右键菜单自带无终端项
   - AUR 插件 `nautilus-open-any-terminal 0.8.2` 支持 ghostty，但 PKGBUILD 的 `depends=(python-nautilus)` 已失效：仓库里是 `nautilus-python 4.2.0` 且不提供该 provides，paru 无法满足依赖；要走路得先 `pacman -S nautilus-python` 再手工 `make build && make install-nautilus PREFIX=/usr`，且必须 root
