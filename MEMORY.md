@@ -5,6 +5,14 @@
 
 ## 最近动态
 
+- **Nautilus 右键「在此打开终端」(2026-10-30, 完成)**:
+  - 默认文件管理器为 Nautilus 51.1（`xdg-mime` → org.gnome.Nautilus），右键菜单自带无终端项
+  - AUR 插件 `nautilus-open-any-terminal 0.8.2` 支持 ghostty，但 PKGBUILD 的 `depends=(python-nautilus)` 已失效：仓库里是 `nautilus-python 4.2.0` 且不提供该 provides，paru 无法满足依赖；要走路得先 `pacman -S nautilus-python` 再手工 `make build && make install-nautilus PREFIX=/usr`，且必须 root
+  - 现用零依赖方案：`~/.local/share/nautilus/scripts/Open Terminal Here`（755），读 `NAUTILUS_SCRIPT_CURRENT_URI`、用 python3 解码百分号，执行 `ghostty --working-directory=<dir>`
+  - 已 chezmoi 纳管：`dot_local/share/nautilus/private_scripts/executable_Open Terminal Here`
+  - 用法：文件管理器右键 → 脚本 → Open Terminal Here；菜单没刷新就 `nautilus -q` 后重开窗口
+  - 验证：以假 ghostty 桩测试，收到 `--working-directory=/home/sigrika/文档`，中文路径解码正常
+
 - **sudo 免重复输密码：30 分钟时间戳缓存 (2026-10-30, 已落地)**:
   - `/etc/sudoers.d/99-sudo-timestamp`（0440 root:root）：`Defaults timestamp_timeout=30` + `Defaults timestamp_type=global`，即输一次密码后 30 分钟内跨终端免输
   - 安装方式：`SUDO_ASKPASS=~/tmp/sudo-askpass.sh sudo -A install -m 0440 ...`，zenity 图形密码框一次性授权，09:34:22 执行成功（journal 有 `session opened for user root`）

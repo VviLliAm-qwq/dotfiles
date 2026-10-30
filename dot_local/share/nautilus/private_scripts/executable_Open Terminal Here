@@ -1,0 +1,25 @@
+#!/bin/bash
+# 在 Nautilus 当前目录打开 Ghostty
+# 用法：右键 → 脚本 → Open Terminal Here
+# Nautilus 通过环境变量传入当前目录的 URI
+
+uri="${NAUTILUS_SCRIPT_CURRENT_URI:-}"
+dir=""
+
+case "$uri" in
+    file://*) dir="${uri#file://}" ;;
+esac
+
+# 没有 URI 时退回脚本自身的工作目录
+if [ -z "$dir" ]; then
+    dir="$PWD"
+fi
+
+# URI 里可能有中文/空格的百分号编码
+if command -v python3 >/dev/null 2>&1; then
+    dir=$(python3 -c 'import sys, urllib.parse; print(urllib.parse.unquote(sys.argv[1]))' "$dir")
+fi
+
+[ -d "$dir" ] || exit 1
+
+exec ghostty --working-directory="$dir"
